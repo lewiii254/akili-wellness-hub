@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
 import { ModeToggle } from '@/components/ModeToggle';
 
@@ -15,6 +14,11 @@ interface Message {
   sender: 'user' | 'bot';
   timestamp: Date;
 }
+
+// Simple function to generate IDs without external dependencies
+const generateId = (): string => {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+};
 
 const ChatPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -33,7 +37,7 @@ const ChatPage = () => {
     if (newMessage.trim() === '') return;
 
     const userMessage: Message = {
-      id: uuidv4(),
+      id: generateId(),
       text: newMessage,
       sender: 'user',
       timestamp: new Date(),
@@ -57,7 +61,7 @@ const ChatPage = () => {
 
       const data = await response.json();
       const botMessage: Message = {
-        id: uuidv4(),
+        id: generateId(),
         text: data.response,
         sender: 'bot',
         timestamp: new Date(),
