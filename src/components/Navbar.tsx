@@ -51,7 +51,7 @@ const Navbar = () => {
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span className="sr-only">
@@ -106,10 +106,10 @@ const Navbar = () => {
           )}
         </div>
       </nav>
-      {/* Mobile menu */}
+      {/* Mobile menu with improved visibility */}
       <div
         className={cn(
-          "fixed inset-0 top-16 bg-background/80 glass-effect lg:hidden z-50 transition-all duration-300 ease-in-out transform",
+          "fixed inset-0 top-16 bg-background/95 glass-effect lg:hidden z-50 transition-all duration-300 ease-in-out transform",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
@@ -122,7 +122,7 @@ const Navbar = () => {
                 className="text-base font-medium leading-7 text-foreground flex items-center gap-2 p-3 rounded-md hover:bg-secondary"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-5 h-5 text-primary" />
                 {item.name}
               </Link>
             ))}

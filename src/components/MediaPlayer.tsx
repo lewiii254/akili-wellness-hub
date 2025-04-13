@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -16,16 +16,79 @@ const MediaPlayer = ({
   title,
   artist,
   coverImage,
-  audioSrc,
+  audioSrc = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // Default audio source
   className,
 }: MediaPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(70);
+  
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    // In a real implementation, we would control the audio element here
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      const currentProgress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+      setProgress(currentProgress);
+    }
+  };
+
+  const handleProgressChange = (value: number[]) => {
+    if (audioRef.current && duration) {
+      const newTime = (value[0] / 100) * duration;
+      audioRef.current.currentTime = newTime;
+      setProgress(value[0]);
+    }
+  };
+
+  const handleVolumeChange = (value: number[]) => {
+    if (audioRef.current) {
+      const newVolume = value[0] / 100;
+      audioRef.current.volume = newVolume;
+      setVolume(value[0]);
+    }
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      const audio = audioRef.current;
+      
+      const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+      };
+
+      const handleEnded = () => {
+        setIsPlaying(false);
+        setProgress(0);
+      };
+
+      // Setup audio event listeners
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.addEventListener('ended', handleEnded);
+      
+      // Set initial volume
+      audio.volume = volume / 100;
+
+      // Cleanup
+      return () => {
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, [volume]);
 
   return (
     <div
@@ -34,6 +97,8 @@ const MediaPlayer = ({
         className
       )}
     >
+      <audio ref={audioRef} src={audioSrc} preload="metadata" />
+      
       <div className="relative rounded-lg overflow-hidden mb-4 aspect-square">
         <img 
           src={coverImage} 
@@ -42,13 +107,16 @@ const MediaPlayer = ({
         />
         <div className={cn(
           "absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity",
-          isPlaying ? "opacity-0" : "opacity-100"
+          isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
         )}>
           <button 
             onClick={togglePlayPause}
             className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center"
           >
-            <Play className="w-8 h-8 text-white" />
+            {isPlaying ? 
+              <Pause className="w-8 h-8 text-white" /> : 
+              <Play className="w-8 h-8 text-white ml-1" />
+            }
           </button>
         </div>
       </div>
@@ -58,15 +126,15 @@ const MediaPlayer = ({
       
       <div className="mt-4">
         <Slider
-          defaultValue={[progress]}
+          value={[progress]}
           max={100}
           step={1}
-          onValueChange={(value) => setProgress(value[0])}
+          onValueChange={handleProgressChange}
           className="my-2"
         />
         <div className="flex justify-between text-xs text-muted-foreground mb-3">
-          <span>{formatTime(progress * 3)}</span>
-          <span>{formatTime(300)}</span> {/* 5 mins (300 seconds) placeholder duration */}
+          <span>{formatTime(progress * duration / 100)}</span>
+          <span>{formatTime(duration)}</span>
         </div>
       </div>
       
@@ -81,7 +149,7 @@ const MediaPlayer = ({
           {isPlaying ? (
             <Pause className="w-5 h-5" />
           ) : (
-            <Play className="w-5 h-5" />
+            <Play className="w-5 h-5 ml-0.5" />
           )}
         </button>
         <button className="text-muted-foreground hover:text-foreground">
@@ -90,9 +158,10 @@ const MediaPlayer = ({
         <div className="flex items-center gap-2">
           <Volume2 className="w-4 h-4 text-muted-foreground" />
           <Slider
-            defaultValue={[70]}
+            value={[volume]}
             max={100}
             step={1}
+            onValueChange={handleVolumeChange}
             className="w-20"
           />
         </div>

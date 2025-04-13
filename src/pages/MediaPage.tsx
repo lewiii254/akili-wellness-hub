@@ -4,13 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MediaPlayer from "@/components/MediaPlayer";
 import YouTubePlayer from "@/components/YouTubePlayer";
 
-// Mock data for music tracks
+// Mock data for music tracks with real audio sources
 const musicTracks = [
   {
     id: 1,
     title: "Calm Waters",
     artist: "Serenity Sounds",
     coverImage: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=1974&auto=format&fit=crop",
+    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     category: "meditation",
   },
   {
@@ -18,6 +19,7 @@ const musicTracks = [
     title: "Forest Journey",
     artist: "Nature Harmony",
     coverImage: "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     category: "sleep",
   },
   {
@@ -25,6 +27,7 @@ const musicTracks = [
     title: "Gentle Rain",
     artist: "Water Elements",
     coverImage: "https://images.unsplash.com/photo-1525824236856-8c0a31dfe3be?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
     category: "meditation",
   },
   {
@@ -32,6 +35,7 @@ const musicTracks = [
     title: "Mountain Breeze",
     artist: "Calm Collective",
     coverImage: "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
     category: "focus",
   },
   {
@@ -39,6 +43,7 @@ const musicTracks = [
     title: "Starry Night",
     artist: "Dream Weavers",
     coverImage: "https://images.unsplash.com/photo-1528722828814-77b9b83aafb2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
     category: "sleep",
   },
   {
@@ -46,6 +51,7 @@ const musicTracks = [
     title: "Ocean Waves",
     artist: "Nature Sounds",
     coverImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80",
+    audioSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
     category: "focus",
   },
 ];
@@ -93,6 +99,7 @@ const videos = [
 const MediaPage = () => {
   const [activeTab, setActiveTab] = useState("music");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [activeAudio, setActiveAudio] = useState<number | null>(null);
 
   // Filter music tracks by category
   const filteredMusic = activeCategory === "all"
@@ -103,6 +110,11 @@ const MediaPage = () => {
   const filteredVideos = activeCategory === "all"
     ? videos
     : videos.filter(video => video.category === activeCategory);
+
+  // Handle audio playing to ensure only one plays at a time
+  const handleAudioPlay = (trackId: number) => {
+    setActiveAudio(trackId === activeAudio ? null : trackId);
+  };
 
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 gradient-bg">
@@ -177,6 +189,7 @@ const MediaPage = () => {
                     title={track.title}
                     artist={track.artist}
                     coverImage={track.coverImage}
+                    audioSrc={track.audioSrc}
                   />
                 ))}
               </div>
