@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +23,6 @@ const ChatPage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Scroll to bottom on new messages
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
@@ -71,7 +69,7 @@ const ChatPage = () => {
         title: "Uh oh! Something went wrong.",
         description: "There was a problem sending your message. Please try again.",
         variant: "destructive",
-      })
+      });
     }
   };
 
