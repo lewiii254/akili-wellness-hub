@@ -2,8 +2,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, RefreshCw, Brain, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
   id: number;
@@ -11,21 +12,49 @@ interface Message {
   sender: "user" | "bot";
 }
 
-// Sample bot responses
+// Enhanced AI responses with more mental health focus
 const botResponses = [
-  "I'm here to support you on your mental wellness journey. How can I help today?",
-  "Taking care of your mental health is important. Would you like some resources on meditation?",
-  "It sounds like you're going through a difficult time. Remember that it's okay to ask for help.",
-  "Have you tried any breathing exercises today? They can be very helpful for managing stress.",
-  "I notice you might be feeling anxious. Would you like me to suggest some grounding techniques?",
-  "Remember, small steps toward wellness are still progress. Be kind to yourself.",
-  "If you're experiencing serious mental health concerns, I'd recommend reaching out to a professional therapist.",
-  "Deep breathing can be very effective for managing stress. Try breathing in for 4 counts, hold for 4, and exhale for 6.",
-  "Journaling can be a helpful way to process your thoughts and emotions. Would you like some journaling prompts?",
-  "Regular physical activity can have significant benefits for mental health. Even a short walk can help clear your mind.",
+  {
+    trigger: ["anxious", "anxiety", "worried", "stress", "stressed"],
+    responses: [
+      "It sounds like you might be experiencing some anxiety. Deep breathing can help - try breathing in for 4 counts, hold for 4, and exhale for 6.",
+      "Anxiety is a natural response, but there are ways to manage it. Have you tried the 5-4-3-2-1 grounding technique? Notice 5 things you can see, 4 things you can touch, 3 things you can hear, 2 things you can smell, and 1 thing you can taste.",
+      "When feeling anxious, it can help to challenge negative thoughts. Try asking yourself: What's the evidence for and against this thought? Is there another way to look at the situation?",
+    ]
+  },
+  {
+    trigger: ["sad", "depression", "depressed", "unhappy", "down"],
+    responses: [
+      "I'm sorry to hear you're feeling down. Remember that emotions are temporary and it's okay to not be okay sometimes. Would you like to talk more about what's contributing to these feelings?",
+      "Depression can make everyday tasks feel overwhelming. Try breaking things down into smaller, more manageable steps, and celebrate small victories.",
+      "Even small amounts of physical activity can help improve mood. Could you try a short walk or some gentle stretching?",
+    ]
+  },
+  {
+    trigger: ["meditation", "mindfulness", "relax", "calm"],
+    responses: [
+      "Meditation can be a powerful tool for mental wellness. Try starting with just 5 minutes of focusing on your breath - in through the nose, out through the mouth.",
+      "A simple mindfulness exercise is to focus completely on one of your senses for a few minutes. What can you hear right now? Try to notice sounds you normally tune out.",
+      "Progressive muscle relaxation can help release physical tension. Start at your toes and work up to your head, tensing each muscle group for 5 seconds, then releasing.",
+    ]
+  },
+  // Default responses when no specific triggers match
+  {
+    trigger: ["default"],
+    responses: [
+      "I'm here to support you on your mental wellness journey. How can I help today?",
+      "Taking care of your mental health is important. Would you like some resources on meditation or stress management?",
+      "It sounds like you're going through a difficult time. Remember that it's okay to ask for help when you need it.",
+      "Have you tried any breathing exercises today? They can be very helpful for managing stress.",
+      "Remember, small steps toward wellness are still progress. Be kind to yourself.",
+      "If you're experiencing serious mental health concerns, I'd recommend reaching out to a professional therapist.",
+      "Journaling can be a helpful way to process your thoughts and emotions. Would you like some journaling prompts?",
+      "Regular physical activity can have significant benefits for mental health. Even a short walk can help clear your mind.",
+    ]
+  }
 ];
 
-// Sample initial bot messages - explicitly typed as Message[]
+// Sample initial bot messages
 const initialBotMessages: Message[] = [
   {
     id: 1,
@@ -43,7 +72,9 @@ const ChatPage = () => {
   const [messages, setMessages] = useState<Message[]>(initialBotMessages);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [aiMode, setAiMode] = useState<"standard" | "advanced">("advanced");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -52,6 +83,32 @@ const ChatPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
+  };
+
+  const getAIResponse = (userInput: string) => {
+    // Simple AI response logic based on keyword matching
+    const userInputLower = userInput.toLowerCase();
+    
+    // Check for specific triggers
+    for (const category of botResponses) {
+      if (category.trigger === ["default"]) continue;
+      
+      const hasMatch = category.trigger.some(keyword => 
+        userInputLower.includes(keyword)
+      );
+      
+      if (hasMatch) {
+        const responses = category.responses;
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+    }
+    
+    // Default to general responses if no triggers matched
+    const defaultResponses = botResponses.find(category => 
+      category.trigger.includes("default")
+    )?.responses || [];
+    
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -70,16 +127,46 @@ const ChatPage = () => {
 
     // Simulate bot response after a short delay
     setTimeout(() => {
-      const randomResponse =
-        botResponses[Math.floor(Math.random() * botResponses.length)];
+      let response;
+      
+      if (aiMode === "advanced") {
+        response = getAIResponse(userMessage.text);
+      } else {
+        // Standard mode - random response
+        const randomResponse =
+          botResponses.find(cat => cat.trigger.includes("default"))?.responses[
+            Math.floor(Math.random() * botResponses.find(cat => cat.trigger.includes("default"))?.responses.length || 0)
+          ] || "I'm here to help.";
+        response = randomResponse;
+      }
+      
       const botMessage: Message = {
         id: messages.length + 2,
-        text: randomResponse,
+        text: response,
         sender: "bot",
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
       setIsTyping(false);
     }, 1500);
+  };
+
+  const toggleAIMode = () => {
+    const newMode = aiMode === "standard" ? "advanced" : "standard";
+    setAiMode(newMode);
+    toast({
+      title: `AI Mode: ${newMode === "advanced" ? "Advanced" : "Standard"}`,
+      description: newMode === "advanced" 
+        ? "Using context-aware responses for better conversation" 
+        : "Using standard response patterns",
+    });
+  };
+
+  const clearChat = () => {
+    setMessages(initialBotMessages);
+    toast({
+      title: "Chat cleared",
+      description: "Starting a fresh conversation",
+    });
   };
 
   return (
@@ -91,6 +178,16 @@ const ChatPage = () => {
           <p className="text-lg text-muted-foreground">
             I'm here to provide support, resources, and guidance for your mental wellness journey.
           </p>
+          <div className="flex justify-center mt-4 space-x-4">
+            <Button variant="outline" size="sm" onClick={toggleAIMode} className="flex items-center">
+              <Brain className="w-4 h-4 mr-2" />
+              {aiMode === "advanced" ? "Advanced AI" : "Standard AI"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={clearChat} className="flex items-center">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reset Chat
+            </Button>
+          </div>
         </div>
 
         {/* Chat Container */}
@@ -114,7 +211,7 @@ const ChatPage = () => {
                     </div>
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-akili-purple to-akili-blue flex items-center justify-center text-white">
-                      <Bot className="h-4 w-4" />
+                      {aiMode === "advanced" ? <Sparkles className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                     </div>
                   )}
                 </div>
@@ -127,7 +224,7 @@ const ChatPage = () => {
               <div className="max-w-[80%] p-4 rounded-2xl bg-secondary text-secondary-foreground self-start rounded-bl-none flex">
                 <div className="flex-shrink-0 mr-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-akili-purple to-akili-blue flex items-center justify-center text-white">
-                    <Bot className="h-4 w-4" />
+                    {aiMode === "advanced" ? <Sparkles className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                   </div>
                 </div>
                 <div className="flex items-end">

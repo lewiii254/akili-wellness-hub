@@ -16,6 +16,7 @@ import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 import PrivateRoute from "./components/PrivateRoute";
+import ChatBot from "./components/ChatBot";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
               />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <ChatBot />
           </Layout>
         </BrowserRouter>
       </TooltipProvider>

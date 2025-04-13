@@ -22,7 +22,7 @@ const navigation = [
   { name: "Resources", href: "/resources", icon: BookOpen },
   { name: "Media", href: "/media", icon: Headphones },
   { name: "Community", href: "/community", icon: Users },
-  { name: "Therapy", href: "/therapy", icon: Calendar },
+  { name: "Therapy", href: "/therapy", icon: Therapy },
 ];
 
 const Navbar = () => {
@@ -109,7 +109,7 @@ const Navbar = () => {
       {/* Mobile menu with improved visibility */}
       <div
         className={cn(
-          "fixed inset-0 top-16 bg-background/95 glass-effect lg:hidden z-50 transition-all duration-300 ease-in-out transform",
+          "fixed inset-0 top-16 bg-background lg:hidden z-50 transition-all duration-300 ease-in-out transform",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
@@ -119,7 +119,7 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-base font-medium leading-7 text-foreground flex items-center gap-2 p-3 rounded-md hover:bg-secondary"
+                className="text-base font-medium leading-7 text-foreground flex items-center gap-2 p-3 rounded-md hover:bg-secondary bg-white/10"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <item.icon className="w-5 h-5 text-primary" />
@@ -128,7 +128,7 @@ const Navbar = () => {
             ))}
             <div className="border-t mt-4 pt-4 flex flex-col gap-3">
               <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" size="lg" className="w-full">
+                <Button variant="outline" size="lg" className="w-full bg-white/90 text-foreground">
                   <MessageCircle className="w-5 h-5 mr-2" />
                   Chat with AI
                 </Button>
@@ -136,7 +136,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="lg" className="w-full">
+                    <Button variant="outline" size="lg" className="w-full bg-white/90 text-foreground">
                       <User className="w-5 h-5 mr-2" />
                       Profile
                     </Button>

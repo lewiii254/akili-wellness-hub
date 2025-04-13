@@ -123,6 +123,11 @@
   -webkit-backdrop-filter: blur(7px);
 }
 
+/* Improved mobile sidebar visibility */
+.mobile-nav-link {
+  @apply text-gray-800 bg-white/90 hover:bg-primary/20;
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
@@ -132,5 +137,16 @@
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+
+/* Fix for mobile menu visibility */
+@media (max-width: 1024px) {
+  .mobile-menu-visible {
+    @apply bg-white/95;
+  }
+  
+  .mobile-menu-link {
+    @apply bg-white/80 text-foreground shadow-sm;
   }
 }
