@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { v4 as uuidv4 } from 'uuid';
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast";
 import { ModeToggle } from '@/components/ModeToggle';
 
 interface Message {
