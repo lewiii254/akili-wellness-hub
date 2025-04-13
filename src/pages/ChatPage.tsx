@@ -25,8 +25,8 @@ const botResponses = [
   "Regular physical activity can have significant benefits for mental health. Even a short walk can help clear your mind.",
 ];
 
-// Sample initial bot messages
-const initialBotMessages = [
+// Sample initial bot messages - explicitly typed as Message[]
+const initialBotMessages: Message[] = [
   {
     id: 1,
     text: "Hi there! I'm your AkiliSpa wellness assistant. How can I help you today?",
