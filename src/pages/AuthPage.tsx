@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,14 +32,13 @@ const AuthPage = () => {
 
   const from = (location.state as { from?: Location })?.from?.pathname || "/";
 
-  // Redirect if already logged in
   React.useEffect(() => {
     if (user) {
       navigate(from, { replace: true });
     }
   }, [user, navigate, from]);
 
-  const loginForm = useForm<LoginFormValues>({
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -48,7 +46,7 @@ const AuthPage = () => {
     },
   });
 
-  const signupForm = useForm<SignupFormValues>({
+  const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       email: "",
@@ -56,11 +54,11 @@ const AuthPage = () => {
     },
   });
 
-  const onLoginSubmit = async (data: LoginFormValues) => {
+  const onLoginSubmit = async (data: z.infer<typeof loginSchema>) => {
     setIsLoading(true);
     try {
-      const { error } = await signIn(data.email, data.password);
-      if (error) throw error;
+      const response = await signIn(data.email, data.password);
+      if (response.error) throw response.error;
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in.",
@@ -77,11 +75,11 @@ const AuthPage = () => {
     }
   };
 
-  const onSignupSubmit = async (data: SignupFormValues) => {
+  const onSignupSubmit = async (data: z.infer<typeof signupSchema>) => {
     setIsLoading(true);
     try {
-      const { error } = await signUp(data.email, data.password);
-      if (error) throw error;
+      const response = await signUp(data.email, data.password);
+      if (response.error) throw response.error;
       toast({
         title: "Account created",
         description: "Please check your email to verify your account.",
