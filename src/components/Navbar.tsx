@@ -1,8 +1,9 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Menu,
   X,
@@ -13,6 +14,7 @@ import {
   Calendar,
   MessageCircle,
   User,
+  LogOut,
 } from "lucide-react";
 
 const navigation = [
@@ -25,6 +27,13 @@ const navigation = [
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 shadow-sm glass-effect bg-background/80">
@@ -74,12 +83,27 @@ const Navbar = () => {
               Chat
             </Button>
           </Link>
-          <Link to="/profile">
-            <Button variant="default" size="sm">
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link to="/profile">
+                <Button variant="outline" size="sm" className="mr-2">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Link to="/auth">
+              <Button variant="default" size="sm">
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            </Link>
+          )}
         </div>
       </nav>
       {/* Mobile menu */}
@@ -109,12 +133,30 @@ const Navbar = () => {
                   Chat with AI
                 </Button>
               </Link>
-              <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="default" size="lg" className="w-full">
-                  <User className="w-5 h-5 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" size="lg" className="w-full">
+                      <User className="w-5 h-5 mr-2" />
+                      Profile
+                    </Button>
+                  </Link>
+                  <Button variant="default" size="lg" className="w-full" onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}>
+                    <LogOut className="w-5 h-5 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="default" size="lg" className="w-full">
+                    <User className="w-5 h-5 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
