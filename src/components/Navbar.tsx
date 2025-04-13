@@ -22,7 +22,7 @@ const navigation = [
   { name: "Resources", href: "/resources", icon: BookOpen },
   { name: "Media", href: "/media", icon: Headphones },
   { name: "Community", href: "/community", icon: Users },
-  { name: "Therapy", href: "/therapy", icon: Therapy },
+  { name: "Therapy", href: "/therapy", icon: Calendar },
 ];
 
 const Navbar = () => {
