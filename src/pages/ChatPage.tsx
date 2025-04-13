@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/components/ui/use-toast"
 import { ModeToggle } from '@/components/ModeToggle';
-import { Moon, Sun } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -22,7 +22,6 @@ const ChatPage = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -76,10 +75,6 @@ const ChatPage = () => {
     }
   };
 
-  const toggleTheme = () => {
-    setIsDarkMode(prevMode => !prevMode);
-  };
-
   return (
     <div className="flex flex-col h-screen bg-background">
       <Card className="flex-grow overflow-hidden">
@@ -105,11 +100,11 @@ const ChatPage = () => {
                 </div>
                 {message.sender === 'user' && (
                   <Avatar className="w-8 h-8 ml-2">
-                    {user?.image ? (
-                      <AvatarImage src={user.image} />
-                    ) : (
-                      <AvatarFallback>{user?.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    )}
+                    <AvatarFallback>
+                      {user && typeof user === 'object' && 'name' in user && typeof user.name === 'string' 
+                        ? user.name.slice(0, 2).toUpperCase() 
+                        : 'U'}
+                    </AvatarFallback>
                   </Avatar>
                 )}
               </div>
@@ -122,6 +117,12 @@ const ChatPage = () => {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               className="flex-grow mr-2"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
             />
             <Button onClick={handleSendMessage}>Send</Button>
           </div>
