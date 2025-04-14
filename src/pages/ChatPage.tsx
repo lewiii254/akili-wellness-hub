@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ModeToggle } from '@/components/ModeToggle';
+import { Send, Sparkles } from "lucide-react";
 
 interface Message {
   id: string;
@@ -21,7 +22,12 @@ const generateId = (): string => {
 };
 
 const ChatPage = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([{
+    id: generateId(),
+    text: "Hi there! I'm your AkiliSpa wellness assistant. How can I help you today?",
+    sender: 'bot',
+    timestamp: new Date(),
+  }]);
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -47,6 +53,19 @@ const ChatPage = () => {
     setNewMessage('');
 
     try {
+      // Simulated response for now
+      setTimeout(() => {
+        const botMessage: Message = {
+          id: generateId(),
+          text: "Thank you for your message! Our team will get back to you soon.",
+          sender: 'bot',
+          timestamp: new Date(),
+        };
+        setMessages(prevMessages => [...prevMessages, botMessage]);
+      }, 1000);
+
+      // Uncomment when API is ready
+      /* 
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -68,6 +87,7 @@ const ChatPage = () => {
       };
 
       setMessages(prevMessages => [...prevMessages, botMessage]);
+      */
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -79,31 +99,42 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <Card className="flex-grow overflow-hidden">
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <Card className="w-full shadow-lg border-2 border-primary/20">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Chat with AkiliSpa AI</h2>
+            <div className="flex items-center">
+              <Sparkles className="text-primary h-5 w-5 mr-2" />
+              <h2 className="text-xl font-semibold">Chat with AkiliSpa AI</h2>
+            </div>
             <ModeToggle />
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col h-full">
-          <div ref={chatContainerRef} className="flex-grow overflow-y-auto mb-4 pr-4">
+        <CardContent className="flex flex-col h-[70vh]">
+          <div 
+            ref={chatContainerRef} 
+            className="flex-grow overflow-y-auto mb-4 pr-2 space-y-4"
+            style={{ height: "calc(70vh - 140px)" }}
+          >
             {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
+              <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-3`}>
                 {message.sender === 'bot' && (
                   <Avatar className="w-8 h-8 mr-2">
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>AI</AvatarFallback>
+                    <AvatarImage src="/placeholder.svg" />
+                    <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
                   </Avatar>
                 )}
-                <div className={`rounded-xl px-4 py-2 ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+                <div className={`max-w-[80%] rounded-xl px-4 py-2 ${
+                  message.sender === 'user' 
+                    ? 'bg-primary text-primary-foreground rounded-br-none' 
+                    : 'bg-accent text-accent-foreground rounded-bl-none'
+                }`}>
                   <p className="text-sm">{message.text}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(message.timestamp).toLocaleTimeString()}</p>
+                  <p className="text-xs opacity-70 mt-1">{new Date(message.timestamp).toLocaleTimeString()}</p>
                 </div>
                 {message.sender === 'user' && (
                   <Avatar className="w-8 h-8 ml-2">
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-secondary text-secondary-foreground">
                       {user && typeof user === 'object' && 'name' in user && typeof user.name === 'string' 
                         ? user.name.slice(0, 2).toUpperCase() 
                         : 'U'}
@@ -113,7 +144,7 @@ const ChatPage = () => {
               </div>
             ))}
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center mt-2 border-t pt-4">
             <Input
               type="text"
               placeholder="Type your message..."
@@ -127,7 +158,9 @@ const ChatPage = () => {
                 }
               }}
             />
-            <Button onClick={handleSendMessage}>Send</Button>
+            <Button onClick={handleSendMessage} className="rounded-full" size="icon">
+              <Send className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
