@@ -106,29 +106,29 @@ const Navbar = () => {
           )}
         </div>
       </nav>
-      {/* Improved Mobile menu with solid background */}
+      {/* Improved Mobile menu with better visibility and no scrolling needed */}
       <div
         className={cn(
           "fixed inset-0 top-16 bg-background lg:hidden z-50 transition-all duration-300 ease-in-out transform",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="fixed inset-0 top-16 flex flex-col px-4 py-6 overflow-y-auto bg-white dark:bg-gray-900 shadow-xl">
-          <div className="flex flex-col gap-4">
+        <div className="fixed inset-0 top-16 flex flex-col p-4 bg-white dark:bg-gray-900 shadow-xl overflow-hidden">
+          <div className="grid grid-cols-1 gap-3 w-full">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-base font-medium leading-7 text-foreground flex items-center gap-2 p-3 rounded-md bg-secondary/50 hover:bg-secondary shadow-sm border border-secondary"
+                className="flex items-center gap-3 p-3 rounded-md bg-primary/10 hover:bg-primary/20 text-foreground font-medium border border-primary/20 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <item.icon className="w-5 h-5 text-primary" />
                 {item.name}
               </Link>
             ))}
-            <div className="border-t mt-4 pt-4 flex flex-col gap-3">
+            <div className="border-t mt-2 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" size="lg" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border">
+                <Button variant="outline" size="default" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20">
                   <MessageCircle className="w-5 h-5 mr-2" />
                   Chat with AI
                 </Button>
@@ -136,22 +136,31 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="lg" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border">
+                    <Button variant="outline" size="default" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20">
                       <User className="w-5 h-5 mr-2" />
                       Profile
                     </Button>
                   </Link>
-                  <Button variant="default" size="lg" className="w-full" onClick={() => {
-                    handleSignOut();
-                    setMobileMenuOpen(false);
-                  }}>
+                  <Button 
+                    variant="default" 
+                    size="default" 
+                    className="w-full col-span-full" 
+                    onClick={() => {
+                      handleSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
                     <LogOut className="w-5 h-5 mr-2" />
                     Sign Out
                   </Button>
                 </>
               ) : (
-                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="default" size="lg" className="w-full">
+                <Link 
+                  to="/auth" 
+                  className="col-span-full"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Button variant="default" size="default" className="w-full">
                     <User className="w-5 h-5 mr-2" />
                     Sign In
                   </Button>
