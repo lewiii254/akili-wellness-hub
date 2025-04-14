@@ -16,11 +16,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 260 10% 10%;
 
-    --primary: 260 70% 75%;
+    --primary: 265 80% 65%;
     --primary-foreground: 260 10% 98%;
 
-    --secondary: 260 20% 96%;
-    --secondary-foreground: 260 10% 15%;
+    --secondary: 200 80% 90%;
+    --secondary-foreground: 200 70% 25%;
 
     --muted: 260 20% 96%;
     --muted-foreground: 260 10% 40%;
@@ -33,7 +33,7 @@
 
     --border: 260 20% 90%;
     --input: 260 20% 90%;
-    --ring: 260 70% 75%;
+    --ring: 265 80% 65%;
 
     --radius: 0.8rem;
 
@@ -57,10 +57,10 @@
     --popover: 260 20% 12%;
     --popover-foreground: 260 10% 95%;
 
-    --primary: 260 70% 75%;
+    --primary: 265 80% 65%;
     --primary-foreground: 260 10% 5%;
 
-    --secondary: 260 15% 20%;
+    --secondary: 200 70% 30%;
     --secondary-foreground: 260 10% 95%;
 
     --muted: 260 15% 20%;
@@ -74,7 +74,7 @@
 
     --border: 260 15% 20%;
     --input: 260 15% 20%;
-    --ring: 260 70% 75%;
+    --ring: 265 80% 65%;
   }
 }
 
@@ -93,29 +93,29 @@
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, hsl(var(--background)), hsl(260, 60%, 97%));
+  background: linear-gradient(135deg, hsl(var(--background)), hsl(265, 80%, 97%));
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
 }
 
 .gradient-card {
-  background: linear-gradient(135deg, rgba(155, 135, 245, 0.1), rgba(14, 165, 233, 0.05));
+  background: linear-gradient(135deg, rgba(147, 87, 245, 0.15), rgba(14, 165, 233, 0.1));
 }
 
 .gradient-card-resources {
-  background: linear-gradient(135deg, rgba(229, 222, 255, 0.6), rgba(155, 135, 245, 0.1));
+  background: linear-gradient(135deg, rgba(229, 222, 255, 0.7), rgba(147, 87, 245, 0.2));
 }
 
 .gradient-card-media {
-  background: linear-gradient(135deg, rgba(211, 228, 253, 0.6), rgba(14, 165, 233, 0.1));
+  background: linear-gradient(135deg, rgba(211, 228, 253, 0.7), rgba(14, 165, 233, 0.2));
 }
 
 .gradient-card-therapy {
-  background: linear-gradient(135deg, rgba(242, 252, 226, 0.6), rgba(74, 222, 128, 0.1));
+  background: linear-gradient(135deg, rgba(242, 252, 226, 0.7), rgba(74, 222, 128, 0.2));
 }
 
 .gradient-card-community {
-  background: linear-gradient(135deg, rgba(254, 198, 161, 0.6), rgba(249, 115, 22, 0.1));
+  background: linear-gradient(135deg, rgba(254, 198, 161, 0.7), rgba(249, 115, 22, 0.2));
 }
 
 .glass-effect {

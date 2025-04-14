@@ -54,9 +54,9 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				akili: {
-					purple: '#9b87f5',
+					purple: '#9352f5',
 					'light-purple': '#E5DEFF',
-					'dark-purple': '#7E69AB',
+					'dark-purple': '#7E55CB',
 					blue: '#0EA5E9',
 					'light-blue': '#D3E4FD',
 					green: '#4ade80',
