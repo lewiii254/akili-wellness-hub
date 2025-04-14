@@ -21,10 +21,21 @@ const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
+// Mental health focused responses
+const mentalHealthResponses = [
+  "It sounds like you're going through a challenging time. How can I support you today?",
+  "Remember that it's okay to prioritize your mental wellbeing. What self-care activities help you feel better?",
+  "Your feelings are valid. Would you like to talk more about what's bothering you?",
+  "Taking care of your mental health is important. Have you considered trying mindfulness or meditation?",
+  "Sometimes just talking about our feelings can help reduce their intensity. I'm here to listen.",
+  "It's brave of you to share your thoughts. What support systems do you have in place right now?",
+  "Small steps toward wellness matter. What's one small thing you could do today to support your mental health?"
+];
+
 const ChatPage = () => {
   const [messages, setMessages] = useState<Message[]>([{
     id: generateId(),
-    text: "Hi there! I'm your AkiliSpa wellness assistant. How can I help you today?",
+    text: "Hi there! I'm your mental wellness assistant. How are you feeling today?",
     sender: 'bot',
     timestamp: new Date(),
   }]);
@@ -53,41 +64,17 @@ const ChatPage = () => {
     setNewMessage('');
 
     try {
-      // Simulated response for now
+      // Simulating AI response with mental health focus
       setTimeout(() => {
+        const randomResponse = mentalHealthResponses[Math.floor(Math.random() * mentalHealthResponses.length)];
         const botMessage: Message = {
           id: generateId(),
-          text: "Thank you for your message! Our team will get back to you soon.",
+          text: randomResponse,
           sender: 'bot',
           timestamp: new Date(),
         };
         setMessages(prevMessages => [...prevMessages, botMessage]);
       }, 1000);
-
-      // Uncomment when API is ready
-      /* 
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: newMessage }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const botMessage: Message = {
-        id: generateId(),
-        text: data.response,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-
-      setMessages(prevMessages => [...prevMessages, botMessage]);
-      */
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -105,7 +92,7 @@ const ChatPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Sparkles className="text-primary h-5 w-5 mr-2" />
-              <h2 className="text-xl font-semibold">Chat with AkiliSpa AI</h2>
+              <h2 className="text-xl font-semibold">Mental Wellness Chat</h2>
             </div>
             <ModeToggle />
           </div>
@@ -113,7 +100,7 @@ const ChatPage = () => {
         <CardContent className="flex flex-col h-[70vh]">
           <div 
             ref={chatContainerRef} 
-            className="flex-grow overflow-y-auto mb-4 pr-2 space-y-4"
+            className="flex-grow overflow-y-auto mb-4 pr-2 space-y-4 bg-background/80 p-4 rounded-lg"
             style={{ height: "calc(70vh - 140px)" }}
           >
             {messages.map((message) => (
@@ -126,8 +113,8 @@ const ChatPage = () => {
                 )}
                 <div className={`max-w-[80%] rounded-xl px-4 py-2 ${
                   message.sender === 'user' 
-                    ? 'bg-primary text-primary-foreground rounded-br-none' 
-                    : 'bg-accent text-accent-foreground rounded-bl-none'
+                    ? 'bg-primary text-primary-foreground rounded-br-none shadow-md' 
+                    : 'bg-secondary text-secondary-foreground rounded-bl-none shadow-md'
                 }`}>
                   <p className="text-sm">{message.text}</p>
                   <p className="text-xs opacity-70 mt-1">{new Date(message.timestamp).toLocaleTimeString()}</p>
@@ -147,10 +134,10 @@ const ChatPage = () => {
           <div className="flex items-center mt-2 border-t pt-4">
             <Input
               type="text"
-              placeholder="Type your message..."
+              placeholder="Share how you're feeling..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-grow mr-2"
+              className="flex-grow mr-2 shadow-sm border-secondary"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

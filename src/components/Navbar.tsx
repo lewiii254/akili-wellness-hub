@@ -106,20 +106,20 @@ const Navbar = () => {
           )}
         </div>
       </nav>
-      {/* Mobile menu with improved visibility */}
+      {/* Improved Mobile menu with solid background */}
       <div
         className={cn(
           "fixed inset-0 top-16 bg-background lg:hidden z-50 transition-all duration-300 ease-in-out transform",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="fixed inset-0 top-16 flex flex-col px-4 py-6 overflow-y-auto">
+        <div className="fixed inset-0 top-16 flex flex-col px-4 py-6 overflow-y-auto bg-white dark:bg-gray-900 shadow-xl">
           <div className="flex flex-col gap-4">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-base font-medium leading-7 text-foreground flex items-center gap-2 p-3 rounded-md hover:bg-secondary bg-white/10"
+                className="text-base font-medium leading-7 text-foreground flex items-center gap-2 p-3 rounded-md bg-secondary/50 hover:bg-secondary shadow-sm border border-secondary"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <item.icon className="w-5 h-5 text-primary" />
@@ -128,7 +128,7 @@ const Navbar = () => {
             ))}
             <div className="border-t mt-4 pt-4 flex flex-col gap-3">
               <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" size="lg" className="w-full bg-white/90 text-foreground">
+                <Button variant="outline" size="lg" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border">
                   <MessageCircle className="w-5 h-5 mr-2" />
                   Chat with AI
                 </Button>
@@ -136,7 +136,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="lg" className="w-full bg-white/90 text-foreground">
+                    <Button variant="outline" size="lg" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border">
                       <User className="w-5 h-5 mr-2" />
                       Profile
                     </Button>

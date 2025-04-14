@@ -12,14 +12,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Sample bot responses
+// Mental health focused bot responses
 const botResponses = [
-  "I'm here to support you on your mental wellness journey. How can I help today?",
-  "Taking care of your mental health is important. Would you like some resources on meditation?",
-  "It sounds like you're going through a difficult time. Remember that it's okay to ask for help.",
-  "Have you tried any breathing exercises today? They can be very helpful for managing stress.",
-  "I notice you might be feeling anxious. Would you like me to suggest some grounding techniques?",
-  "Remember, small steps toward wellness are still progress. Be kind to yourself.",
+  "I'm here to support your mental wellbeing. What's on your mind today?",
+  "Remember that it's okay to not be okay sometimes. Would you like some self-care techniques?",
+  "Taking small steps for your mental health can make a big difference. Have you tried any mindfulness exercises lately?",
+  "It sounds like you're going through a challenging time. Remember that seeking help is a sign of strength, not weakness.",
+  "Deep breathing can help in moments of anxiety - would you like me to guide you through a simple breathing exercise?",
+  "Getting enough sleep is crucial for mental health. Would you like some tips for better sleep habits?",
+  "Sometimes a change in perspective can help. Let's try to look at this situation from a different angle.",
+  "Physical activity can boost your mood by releasing endorphins. Even a short walk can make a difference.",
+  "It's important to be kind to yourself during difficult times. Self-compassion is a powerful healing tool.",
+  "Connecting with others can help improve your mental wellbeing. Is there someone you could reach out to today?",
 ];
 
 interface Message {
@@ -34,7 +38,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi there! I'm your AkiliSpa wellness assistant. How can I help you today?",
+      text: "Hi there! I'm your mental wellness assistant. How are you feeling today?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -65,13 +69,26 @@ const ChatBot = () => {
     setInputValue("");
     setIsTyping(true);
 
+    // Process user message for mental health context
+    const userText = inputValue.toLowerCase();
+    let responseIndex = Math.floor(Math.random() * botResponses.length);
+    
+    // Simple keyword detection for more relevant responses
+    if (userText.includes("anxious") || userText.includes("anxiety") || userText.includes("worried")) {
+      responseIndex = 4; // Deep breathing suggestion
+    } else if (userText.includes("sleep") || userText.includes("tired")) {
+      responseIndex = 5; // Sleep tips
+    } else if (userText.includes("sad") || userText.includes("depressed") || userText.includes("unhappy")) {
+      responseIndex = 3; // Support message
+    } else if (userText.includes("alone") || userText.includes("lonely")) {
+      responseIndex = 9; // Connection suggestion
+    }
+
     // Simulate bot response after a short delay
     setTimeout(() => {
-      const randomResponse =
-        botResponses[Math.floor(Math.random() * botResponses.length)];
       const botMessage: Message = {
         id: messages.length + 2,
-        text: randomResponse,
+        text: botResponses[responseIndex],
         sender: "bot",
         timestamp: new Date(),
       };
@@ -86,7 +103,7 @@ const ChatBot = () => {
       <button
         onClick={toggleChat}
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center p-4 rounded-full bg-akili-purple text-white shadow-lg hover:bg-akili-dark-purple transition-colors"
-        aria-label="Open chat"
+        aria-label="Open mental wellness chat"
       >
         {isOpen ? (
           <X className="h-6 w-6" />
@@ -107,7 +124,7 @@ const ChatBot = () => {
           <div className="bg-gradient-to-r from-akili-purple to-akili-blue p-4 text-white flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <Sparkles className="h-5 w-5" />
-              <h3 className="font-medium">Akili Wellness Assistant</h3>
+              <h3 className="font-medium">Mental Wellness Assistant</h3>
             </div>
             <button
               onClick={toggleChat}
@@ -151,9 +168,9 @@ const ChatBot = () => {
           </div>
 
           {/* Chat input */}
-          <form onSubmit={handleSubmit} className="p-3 bg-secondary flex">
+          <form onSubmit={handleSubmit} className="p-3 bg-secondary/30 flex">
             <Input
-              placeholder="Type a message..."
+              placeholder="Share how you're feeling..."
               value={inputValue}
               onChange={handleInputChange}
               className="flex-1 mr-2 bg-background focus-visible:ring-primary"

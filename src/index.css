@@ -19,8 +19,8 @@
     --primary: 275 95% 55%;
     --primary-foreground: 260 10% 98%;
 
-    --secondary: 191 85% 78%;
-    --secondary-foreground: 191 75% 20%;
+    --secondary: 210 85% 78%;
+    --secondary-foreground: 210 75% 20%;
 
     --muted: 260 20% 96%;
     --muted-foreground: 260 10% 40%;
@@ -60,7 +60,7 @@
     --primary: 275 95% 65%;
     --primary-foreground: 260 10% 5%;
 
-    --secondary: 191 70% 40%;
+    --secondary: 210 70% 40%;
     --secondary-foreground: 260 10% 95%;
 
     --muted: 260 15% 20%;
@@ -94,7 +94,7 @@
 
 .gradient-bg {
   background: linear-gradient(135deg, hsl(var(--background)), hsl(275, 95%, 97%));
-  background-size: 400% 400%;
+  background-size: 200% 200%;
   animation: gradient 15s ease infinite;
 }
 
@@ -119,13 +119,15 @@
 }
 
 .glass-effect {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Improved mobile sidebar visibility */
 .mobile-nav-link {
-  @apply text-gray-800 bg-white/90 hover:bg-primary/20;
+  @apply text-gray-800 bg-white hover:bg-primary/20 shadow-sm border border-gray-100;
 }
 
 @keyframes gradient {
@@ -143,11 +145,11 @@
 /* Fix for mobile menu visibility */
 @media (max-width: 1024px) {
   .mobile-menu-visible {
-    @apply bg-white/95;
+    @apply bg-white shadow-lg;
   }
   
   .mobile-menu-link {
-    @apply bg-white/80 text-foreground shadow-sm;
+    @apply bg-white text-foreground shadow-sm border border-gray-100;
   }
 }
 
@@ -178,4 +180,23 @@ button:active {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary) / 0.8);
+}
+
+/* Card and component enhancements */
+.card-highlight {
+  @apply border-2 border-primary/30 shadow-lg hover:shadow-primary/10 transition-all;
+}
+
+.button-glow {
+  box-shadow: 0 0 10px rgba(142, 57, 227, 0.5);
+}
+
+/* Animation for mental health chat bot */
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s infinite;
 }
