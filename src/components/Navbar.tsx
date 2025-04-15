@@ -36,7 +36,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 shadow-sm glass-effect bg-background/80">
+    <header className="fixed top-0 left-0 right-0 z-50 shadow-sm bg-background">
       <nav className="flex items-center justify-between p-4 lg:px-8 max-w-7xl mx-auto" aria-label="Global">
         <div className="flex items-center">
           <Link to="/" className="flex items-center gap-2">
@@ -107,87 +107,115 @@ const Navbar = () => {
         </div>
       </nav>
       
-      {/* Redesigned Mobile Menu */}
+      {/* Fixed Mobile Menu - Completely Redesigned for Maximum Visibility */}
       <div
         className={cn(
-          "fixed inset-0 top-16 bg-white dark:bg-gray-900 lg:hidden z-50 transition-all duration-300 ease-in-out transform overflow-y-auto",
+          "fixed inset-y-0 right-0 z-50 w-full sm:max-w-sm bg-white dark:bg-gray-900 shadow-xl",
+          "transition-transform duration-300 ease-in-out transform",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex flex-col p-4 max-h-[calc(100vh-4rem)] pb-20">
-          {/* Navigation links with better visibility */}
-          <div className="flex flex-col space-y-2">
-            <h3 className="font-semibold text-lg px-2 mb-1 text-foreground">Navigation</h3>
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-primary/20 text-foreground font-medium border border-primary/20 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  <item.icon className="w-4 h-4 text-primary" />
-                </div>
-                <span>{item.name}</span>
-              </Link>
-            ))}
-          </div>
+        <div className="flex flex-col h-full pt-16 pb-6 px-4 overflow-y-auto">
+          {/* Close button positioned at the top right */}
+          <button
+            className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <X className="h-6 w-6" />
+          </button>
           
-          {/* Account actions with better visibility */}
-          <div className="border-t mt-4 pt-4">
-            <h3 className="font-semibold text-lg px-2 mb-2 text-foreground">Account</h3>
-            <div className="grid grid-cols-1 gap-2">
-              <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
-                <Button 
-                  variant="outline" 
-                  size="default" 
-                  className="w-full bg-secondary/50 text-foreground shadow-sm border border-primary/20 justify-start"
-                >
-                  <MessageCircle className="w-4 h-4 mr-3" />
-                  <span>Chat with AI</span>
-                </Button>
-              </Link>
-              
-              {user ? (
-                <>
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button 
-                      variant="outline" 
-                      size="default" 
-                      className="w-full bg-secondary/50 text-foreground shadow-sm border border-primary/20 justify-start"
-                    >
-                      <User className="w-4 h-4 mr-3" />
-                      <span>Profile</span>
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="default" 
-                    size="default" 
-                    className="w-full justify-start"
-                    onClick={() => {
-                      handleSignOut();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <LogOut className="w-4 h-4 mr-3" />
-                    <span>Sign Out</span>
-                  </Button>
-                </>
-              ) : (
-                <Link 
-                  to="/auth" 
+          <div className="py-6">
+            <h2 className="text-xl font-bold text-foreground px-2 mb-4">
+              Navigation
+            </h2>
+            
+            {/* Navigation Links - Bigger and more visible */}
+            <div className="space-y-3">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-primary/10 text-foreground font-medium transition-colors"
                 >
-                  <Button variant="default" size="default" className="w-full justify-start">
-                    <User className="w-4 h-4 mr-3" />
-                    <span>Sign In</span>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <span className="text-lg">{item.name}</span>
+                </Link>
+              ))}
+            </div>
+            
+            {/* Account Section */}
+            <div className="mt-8">
+              <h2 className="text-xl font-bold text-foreground px-2 mb-4">
+                Account
+              </h2>
+              <div className="space-y-3">
+                <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="w-full justify-start text-foreground bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                  >
+                    <MessageCircle className="w-5 h-5 mr-3" />
+                    <span className="text-lg">Chat with AI</span>
                   </Button>
                 </Link>
-              )}
+                
+                {user ? (
+                  <>
+                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="w-full justify-start text-foreground bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                      >
+                        <User className="w-5 h-5 mr-3" />
+                        <span className="text-lg">Profile</span>
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="default" 
+                      size="lg" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        handleSignOut();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-5 h-5 mr-3" />
+                      <span className="text-lg">Sign Out</span>
+                    </Button>
+                  </>
+                ) : (
+                  <Link 
+                    to="/auth" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Button 
+                      variant="default" 
+                      size="lg" 
+                      className="w-full justify-start"
+                    >
+                      <User className="w-5 h-5 mr-3" />
+                      <span className="text-lg">Sign In</span>
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Dark overlay when mobile menu is open */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
     </header>
   );
 };
