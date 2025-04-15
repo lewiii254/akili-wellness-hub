@@ -283,7 +283,7 @@ const TherapyPage = () => {
 
         {/* Additional Information */}
         <div className="mt-16 p-6 bg-background/50 rounded-xl shadow-sm">
-          <h2 className="text-2xl font-bold mb-4">Why Choose AkiliSpa Therapy</h2>
+          <h2 className="text-2xl font-bold mb-4">Why Choose AkiliSpa Therapy✨</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex flex-col items-center text-center p-4">
               <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-3">
