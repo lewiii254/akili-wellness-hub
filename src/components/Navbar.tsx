@@ -19,6 +19,7 @@ import {
   Sun,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home, emoji: "🏠" },
@@ -29,7 +30,6 @@ const navigation = [
 ];
 
 const Navbar = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
@@ -59,22 +59,8 @@ const Navbar = () => {
             </div>
           </Link>
         </div>
-        <div className="flex lg:hidden">
-          <button
-            type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <span className="sr-only">
-              {mobileMenuOpen ? "Close main menu" : "Open main menu"}
-            </span>
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" aria-hidden="true" />
-            ) : (
-              <Menu className="h-6 w-6" aria-hidden="true" />
-            )}
-          </button>
-        </div>
+        
+        {/* Desktop Navigation */}
         <div className="hidden lg:flex lg:gap-x-6">
           {navigation.map((item) => (
             <Link
@@ -87,6 +73,8 @@ const Navbar = () => {
             </Link>
           ))}
         </div>
+        
+        {/* Desktop User Menu */}
         <div className="hidden lg:flex lg:items-center lg:gap-2">
           <Button 
             variant="ghost" 
@@ -127,141 +115,113 @@ const Navbar = () => {
             </Link>
           )}
         </div>
-      </nav>
-      
-      {/* Mobile Menu - Improved for Maximum Visibility */}
-      <div
-        className={cn(
-          "fixed inset-y-0 right-0 z-50 w-full sm:max-w-sm bg-background border-l shadow-lg",
-          "transition-transform duration-300 ease-in-out transform",
-          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        <div className="flex flex-col h-full pt-16 pb-6 px-4 overflow-y-auto bg-white dark:bg-gray-900">
-          {/* Close button positioned at the top right */}
-          <button
-            className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-foreground"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <X className="h-6 w-6" />
-          </button>
-          
-          <div className="py-6">
-            <h2 className="text-xl font-bold text-foreground px-2 mb-4 flex items-center">
-              <Sparkles className="h-5 w-5 mr-2 text-akili-purple" />
-              Navigation
-            </h2>
-            
-            {/* Navigation Links - Bigger and more visible */}
-            <div className="space-y-3">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-primary/10 text-foreground font-medium transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-xl">{item.emoji}</span>
-                  </div>
-                  <span className="text-lg">{item.name}</span>
-                </Link>
-              ))}
-            </div>
-            
-            {/* Account Section */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold text-foreground px-2 mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2 text-akili-purple" />
-                Account
-              </h2>
-              <div className="space-y-3">
-                <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
+
+        {/* Mobile Menu Trigger - Using Shadcn Sheet Component for better mobile experience */}
+        <div className="flex lg:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" className="p-2">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[85%] sm:w-[385px] bg-background p-0 pt-14">
+              <div className="h-full overflow-y-auto py-6 px-6">
+                <h2 className="text-xl font-bold text-foreground mb-6 flex items-center">
+                  <Sparkles className="h-5 w-5 mr-2 text-akili-purple" />
+                  Navigation
+                </h2>
+                
+                <div className="space-y-3 mb-8">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-primary/10 text-foreground font-medium transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-xl">{item.emoji}</span>
+                      </div>
+                      <span className="text-lg">{item.name}</span>
+                    </Link>
+                  ))}
+                </div>
+                
+                <h2 className="text-xl font-bold text-foreground mb-4 flex items-center">
+                  <User className="h-5 w-5 mr-2 text-akili-purple" />
+                  Account
+                </h2>
+                <div className="space-y-3">
+                  <Link to="/chat">
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full justify-start text-foreground bg-secondary/50"
+                    >
+                      <MessageCircle className="w-5 h-5 mr-3" />
+                      <span className="text-lg">Chat with AI 💬</span>
+                    </Button>
+                  </Link>
+                  
+                  {user ? (
+                    <>
+                      <Link to="/profile">
+                        <Button 
+                          variant="outline" 
+                          size="lg" 
+                          className="w-full justify-start text-foreground bg-secondary/50"
+                        >
+                          <User className="w-5 h-5 mr-3" />
+                          <span className="text-lg">Profile 👤</span>
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="default" 
+                        size="lg" 
+                        className="w-full justify-start"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="w-5 h-5 mr-3" />
+                        <span className="text-lg">Sign Out 👋</span>
+                      </Button>
+                    </>
+                  ) : (
+                    <Link to="/auth">
+                      <Button 
+                        variant="default" 
+                        size="lg" 
+                        className="w-full justify-start"
+                      >
+                        <User className="w-5 h-5 mr-3" />
+                        <span className="text-lg">Sign In 🔑</span>
+                      </Button>
+                    </Link>
+                  )}
+                  
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="w-full justify-start text-foreground bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                    className="w-full justify-start bg-secondary/50"
+                    onClick={toggleTheme}
                   >
-                    <MessageCircle className="w-5 h-5 mr-3" />
-                    <span className="text-lg">Chat with AI 💬</span>
+                    {theme === "light" ? (
+                      <>
+                        <Sun className="w-5 h-5 mr-3" />
+                        <span className="text-lg">Light Mode ☀️</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5 mr-3" />
+                        <span className="text-lg">Dark Mode ✨</span>
+                      </>
+                    )}
                   </Button>
-                </Link>
-                
-                {user ? (
-                  <>
-                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        className="w-full justify-start text-foreground bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                      >
-                        <User className="w-5 h-5 mr-3" />
-                        <span className="text-lg">Profile 👤</span>
-                      </Button>
-                    </Link>
-                    <Button 
-                      variant="default" 
-                      size="lg" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        handleSignOut();
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <LogOut className="w-5 h-5 mr-3" />
-                      <span className="text-lg">Sign Out 👋</span>
-                    </Button>
-                  </>
-                ) : (
-                  <Link 
-                    to="/auth" 
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button 
-                      variant="default" 
-                      size="lg" 
-                      className="w-full justify-start"
-                    >
-                      <User className="w-5 h-5 mr-3" />
-                      <span className="text-lg">Sign In 🔑</span>
-                    </Button>
-                  </Link>
-                )}
-                
-                {/* Theme toggle button */}
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="w-full justify-start bg-gray-100 dark:bg-gray-800"
-                  onClick={() => {
-                    toggleTheme();
-                  }}
-                >
-                  {theme === "light" ? (
-                    <>
-                      <Sun className="w-5 h-5 mr-3" />
-                      <span className="text-lg">Light Mode ☀️</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-3" />
-                      <span className="text-lg">Dark Mode ✨</span>
-                    </>
-                  )}
-                </Button>
+                </div>
               </div>
-            </div>
-          </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      </div>
-      
-      {/* Dark overlay when mobile menu is open */}
-      {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+      </nav>
     </header>
   );
 };
