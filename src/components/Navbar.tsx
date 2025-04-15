@@ -106,44 +106,45 @@ const Navbar = () => {
           )}
         </div>
       </nav>
-      {/* Full-screen mobile menu with improved visibility */}
+      
+      {/* Redesigned Mobile Menu */}
       <div
         className={cn(
-          "fixed inset-0 top-16 bg-background/95 lg:hidden z-50 transition-all duration-300 ease-in-out transform",
+          "fixed inset-0 top-16 bg-white dark:bg-gray-900 lg:hidden z-50 transition-all duration-300 ease-in-out transform overflow-y-auto",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="fixed inset-0 top-16 flex flex-col p-4 max-h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 shadow-xl">
-          {/* Navigation links */}
-          <div className="flex flex-col space-y-3 pb-4">
-            <h3 className="font-semibold text-lg px-2 mb-1">Navigation</h3>
+        <div className="flex flex-col p-4 max-h-[calc(100vh-4rem)] pb-20">
+          {/* Navigation links with better visibility */}
+          <div className="flex flex-col space-y-2">
+            <h3 className="font-semibold text-lg px-2 mb-1 text-foreground">Navigation</h3>
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className="flex items-center gap-3 p-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-foreground font-medium border border-primary/20 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-primary/20 text-foreground font-medium border border-primary/20 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-primary" />
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <item.icon className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-lg">{item.name}</span>
+                <span>{item.name}</span>
               </Link>
             ))}
           </div>
           
-          {/* Account actions */}
-          <div className="border-t mt-2 pt-4">
-            <h3 className="font-semibold text-lg px-2 mb-3">Account</h3>
-            <div className="grid grid-cols-1 gap-3">
+          {/* Account actions with better visibility */}
+          <div className="border-t mt-4 pt-4">
+            <h3 className="font-semibold text-lg px-2 mb-2 text-foreground">Account</h3>
+            <div className="grid grid-cols-1 gap-2">
               <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
                 <Button 
                   variant="outline" 
-                  size="lg" 
-                  className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20 h-14"
+                  size="default" 
+                  className="w-full bg-secondary/50 text-foreground shadow-sm border border-primary/20 justify-start"
                 >
-                  <MessageCircle className="w-5 h-5 mr-3" />
-                  <span className="text-base">Chat with AI</span>
+                  <MessageCircle className="w-4 h-4 mr-3" />
+                  <span>Chat with AI</span>
                 </Button>
               </Link>
               
@@ -152,24 +153,24 @@ const Navbar = () => {
                   <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
                     <Button 
                       variant="outline" 
-                      size="lg" 
-                      className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20 h-14"
+                      size="default" 
+                      className="w-full bg-secondary/50 text-foreground shadow-sm border border-primary/20 justify-start"
                     >
-                      <User className="w-5 h-5 mr-3" />
-                      <span className="text-base">Profile</span>
+                      <User className="w-4 h-4 mr-3" />
+                      <span>Profile</span>
                     </Button>
                   </Link>
                   <Button 
                     variant="default" 
-                    size="lg" 
-                    className="w-full h-14"
+                    size="default" 
+                    className="w-full justify-start"
                     onClick={() => {
                       handleSignOut();
                       setMobileMenuOpen(false);
                     }}
                   >
-                    <LogOut className="w-5 h-5 mr-3" />
-                    <span className="text-base">Sign Out</span>
+                    <LogOut className="w-4 h-4 mr-3" />
+                    <span>Sign Out</span>
                   </Button>
                 </>
               ) : (
@@ -177,9 +178,9 @@ const Navbar = () => {
                   to="/auth" 
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Button variant="default" size="lg" className="w-full h-14">
-                    <User className="w-5 h-5 mr-3" />
-                    <span className="text-base">Sign In</span>
+                  <Button variant="default" size="default" className="w-full justify-start">
+                    <User className="w-4 h-4 mr-3" />
+                    <span>Sign In</span>
                   </Button>
                 </Link>
               )}

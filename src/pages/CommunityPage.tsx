@@ -1,16 +1,128 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
-import { Users, MessageCircle, Heart, Shield, Lock, Mail } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Users, 
+  MessageCircle, 
+  Heart, 
+  Shield, 
+  Lock, 
+  Mail,
+  Calendar,
+  MessageSquare,
+  Flag,
+  ThumbsUp,
+  Clock,
+  User
+} from "lucide-react";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { useAuth } from "@/hooks/useAuth";
+
+// Sample community discussions
+const discussions = [
+  {
+    id: 1,
+    title: "Dealing with daily anxiety",
+    author: "Sarah J.",
+    date: "3 days ago",
+    replies: 12,
+    likes: 24,
+    tags: ["Anxiety", "Self-care"],
+    authorAvatar: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    id: 2,
+    title: "Mindfulness practice techniques",
+    author: "Michael T.",
+    date: "1 week ago",
+    replies: 28,
+    likes: 56,
+    tags: ["Mindfulness", "Meditation"],
+    authorAvatar: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    id: 3,
+    title: "Sleep improvement strategies",
+    author: "Elena D.",
+    date: "2 days ago",
+    replies: 17,
+    likes: 31,
+    tags: ["Sleep", "Wellness"],
+    authorAvatar: "https://i.pravatar.cc/150?img=3",
+  },
+];
+
+// Sample upcoming events
+const events = [
+  {
+    id: 1,
+    title: "Group Meditation Session",
+    date: "May 1, 2025",
+    time: "6:00 PM - 7:00 PM",
+    attendees: 12,
+    host: "Dr. Lisa Chen",
+    type: "Virtual",
+  },
+  {
+    id: 2,
+    title: "Stress Management Workshop",
+    date: "May 5, 2025",
+    time: "4:00 PM - 5:30 PM",
+    attendees: 24,
+    host: "Mark Wilson, LCSW",
+    type: "In-person",
+  },
+];
+
+// Sample support groups
+const supportGroups = [
+  {
+    id: 1,
+    name: "Anxiety Support Circle",
+    members: 145,
+    description: "A supportive community for sharing anxiety experiences and coping strategies.",
+    topics: ["General Anxiety", "Social Anxiety", "Panic Attacks"],
+  },
+  {
+    id: 2,
+    name: "Mindfulness Practitioners",
+    members: 92,
+    description: "For those practicing mindfulness and meditation in daily life.",
+    topics: ["Meditation", "Present Awareness", "Mindful Living"],
+  },
+];
 
 const CommunityPage = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [postContent, setPostContent] = useState("");
+  const { user } = useAuth();
+  
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
@@ -34,27 +146,251 @@ const CommunityPage = () => {
       setIsSubmitting(false);
     }, 1500);
   };
+  
+  const handleNewPost = () => {
+    if (!postContent.trim()) {
+      toast({
+        title: "Post content required",
+        description: "Please write something to post.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Post submitted",
+      description: "Your post will be reviewed by moderators.",
+    });
+    setPostContent("");
+  };
+  
+  const handleJoinGroup = (groupName: string) => {
+    toast({
+      title: `Joined ${groupName}`,
+      description: "You've successfully joined the group.",
+    });
+  };
+  
+  const handleRegisterForEvent = (eventTitle: string) => {
+    toast({
+      title: "Registration successful",
+      description: `You've registered for "${eventTitle}"`,
+    });
+  };
 
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 gradient-bg">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">AkiliSpa Community</h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Connect with others on similar mental wellness journeys, share experiences, and find support in our safe and moderated community spaces.
+            Connect with others on similar mental wellness journeys, share experiences, and find support in our safe and moderated spaces.
           </p>
         </div>
 
-        {/* Coming Soon Notice */}
-        <div className="max-w-3xl mx-auto">
+        {user ? (
+          <Tabs defaultValue="discussions" className="w-full">
+            <TabsList className="grid grid-cols-3 mb-8">
+              <TabsTrigger value="discussions">Discussions</TabsTrigger>
+              <TabsTrigger value="groups">Support Groups</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
+            </TabsList>
+            
+            {/* Discussions Tab Content */}
+            <TabsContent value="discussions" className="space-y-6">
+              <Card className="p-6">
+                <h3 className="text-xl font-semibold mb-4">Start a Discussion</h3>
+                <Textarea 
+                  placeholder="What's on your mind?" 
+                  className="min-h-[100px] mb-4"
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                />
+                <div className="flex justify-end">
+                  <Button onClick={handleNewPost}>Post</Button>
+                </div>
+              </Card>
+              
+              <h3 className="text-xl font-semibold mb-2">Recent Discussions</h3>
+              
+              <div className="space-y-4">
+                {discussions.map((discussion) => (
+                  <Sheet key={discussion.id}>
+                    <SheetTrigger asChild>
+                      <Card className="p-5 hover:shadow-md cursor-pointer transition-shadow">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10">
+                            <img src={discussion.authorAvatar} alt={discussion.author} />
+                          </Avatar>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-lg mb-1">{discussion.title}</h4>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {discussion.tags.map((tag) => (
+                                <Badge key={tag} variant="outline" className="bg-secondary/30">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <span className="mr-4">By {discussion.author}</span>
+                              <Clock className="h-3 w-3 mr-1" />
+                              <span className="mr-4">{discussion.date}</span>
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              <span className="mr-4">{discussion.replies} replies</span>
+                              <ThumbsUp className="h-3 w-3 mr-1" />
+                              <span>{discussion.likes}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-md">
+                      <SheetHeader>
+                        <SheetTitle>{discussion.title}</SheetTitle>
+                        <SheetDescription>
+                          Started by {discussion.author} · {discussion.date}
+                        </SheetDescription>
+                      </SheetHeader>
+                      <div className="py-6">
+                        <p className="mb-6">
+                          This is a placeholder for the discussion content. In the full version, 
+                          this would contain the actual post content and comments.
+                        </p>
+                        <div className="space-y-4">
+                          <div className="border-t pt-4">
+                            <h4 className="font-medium mb-2">Comments</h4>
+                            <Textarea placeholder="Add your comment..." className="mb-2" />
+                            <Button size="sm">Comment</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                ))}
+              </div>
+            </TabsContent>
+            
+            {/* Support Groups Tab Content */}
+            <TabsContent value="groups" className="space-y-6">
+              <h3 className="text-xl font-semibold mb-4">Support Groups</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {supportGroups.map((group) => (
+                  <Card key={group.id} className="p-6">
+                    <h4 className="text-lg font-semibold mb-2">{group.name}</h4>
+                    <div className="flex items-center text-sm text-muted-foreground mb-3">
+                      <Users className="h-4 w-4 mr-1" />
+                      <span>{group.members} members</span>
+                    </div>
+                    <p className="mb-4">{group.description}</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {group.topics.map((topic) => (
+                        <Badge key={topic} variant="outline" className="bg-secondary/30">
+                          {topic}
+                        </Badge>
+                      ))}
+                    </div>
+                    <Button 
+                      onClick={() => handleJoinGroup(group.name)}
+                      className="w-full"
+                    >
+                      Join Group
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+              
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="outline" className="w-full">Create New Group</Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>Create Support Group</DrawerTitle>
+                    <DrawerDescription>
+                      Create a new support group for the community.
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Group Name</label>
+                      <Input placeholder="Name your group" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Description</label>
+                      <Textarea placeholder="Describe what your group is about" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Topics (comma separated)</label>
+                      <Input placeholder="e.g., Anxiety, Depression, Mindfulness" />
+                    </div>
+                  </div>
+                  <DrawerFooter>
+                    <Button onClick={() => {
+                      toast({
+                        title: "Group created",
+                        description: "Your group will be reviewed by moderators.",
+                      });
+                    }}>Create Group</Button>
+                    <DrawerClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            </TabsContent>
+            
+            {/* Events Tab Content */}
+            <TabsContent value="events" className="space-y-6">
+              <h3 className="text-xl font-semibold mb-4">Upcoming Events</h3>
+              
+              <div className="space-y-4">
+                {events.map((event) => (
+                  <Card key={event.id} className="p-5">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                      <div>
+                        <h4 className="font-semibold text-lg mb-1">{event.title}</h4>
+                        <div className="flex items-center text-sm text-muted-foreground mb-2">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span className="mr-3">{event.date}</span>
+                          <Clock className="h-4 w-4 mr-1" />
+                          <span>{event.time}</span>
+                        </div>
+                        <div className="flex items-center text-sm mb-3">
+                          <User className="h-4 w-4 mr-1" />
+                          <span className="mr-3">Host: {event.host}</span>
+                          <Badge variant="outline">{event.type}</Badge>
+                        </div>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Users className="h-4 w-4 mr-1" />
+                          <span>{event.attendees} attending</span>
+                        </div>
+                      </div>
+                      <Button 
+                        className="mt-4 md:mt-0"
+                        onClick={() => handleRegisterForEvent(event.title)}
+                      >
+                        Register
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              
+              <div className="flex justify-center mt-8">
+                <Button variant="outline">View All Events</Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        ) : (
           <Card className="p-8 text-center bg-akili-light-orange/30 border-2 border-akili-orange/20">
             <div className="w-20 h-20 rounded-full bg-akili-orange/20 flex items-center justify-center mx-auto mb-6">
               <Users className="h-10 w-10 text-akili-orange" />
             </div>
-            <h2 className="text-3xl font-bold mb-4">Community Coming Soon!</h2>
+            <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
             <p className="text-lg mb-6">
-              We're working hard to create a supportive and engaging community space for our members. Sign up to be notified when our community features go live.
+              Sign in or create an account to access our community features, join discussions, and connect with others.
             </p>
             <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <div className="flex-grow">
@@ -63,12 +399,10 @@ const CommunityPage = () => {
                   placeholder="Enter your email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12"
                 />
               </div>
               <Button 
                 type="submit" 
-                size="lg" 
                 className="rounded-full px-8"
                 disabled={isSubmitting}
               >
@@ -76,122 +410,21 @@ const CommunityPage = () => {
               </Button>
             </form>
           </Card>
-        </div>
-
-        {/* Community Progress */}
-        <div className="mt-16 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6 text-center">Development Progress</h2>
-          <div className="bg-background rounded-xl p-6 shadow-sm border">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
-                    Completed
-                  </Badge>
-                  <span className="font-medium">Community Framework</span>
-                </div>
-                <span className="text-sm text-muted-foreground">100%</span>
-              </div>
-              
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: "100%" }}></div>
-              </div>
-              
-              <div className="flex justify-between items-center mt-4">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300">
-                    In Progress
-                  </Badge>
-                  <span className="font-medium">Groups & Forums</span>
-                </div>
-                <span className="text-sm text-muted-foreground">65%</span>
-              </div>
-              
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "65%" }}></div>
-              </div>
-              
-              <div className="flex justify-between items-center mt-4">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                    Planning
-                  </Badge>
-                  <span className="font-medium">Direct Messaging</span>
-                </div>
-                <span className="text-sm text-muted-foreground">25%</span>
-              </div>
-              
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: "25%" }}></div>
-              </div>
-              
-              <div className="flex justify-between items-center mt-4">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300">
-                    Not Started
-                  </Badge>
-                  <span className="font-medium">Events & Calendar</span>
-                </div>
-                <span className="text-sm text-muted-foreground">0%</span>
-              </div>
-              
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div className="bg-gray-500 h-2 rounded-full" style={{ width: "0%" }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Community Features Preview */}
-        <div className="mt-20">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
-            What to Expect from Our Community
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-background rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-              <MessageCircle className="h-10 w-10 text-akili-orange mb-4" />
-              <h3 className="text-xl font-medium mb-2">Discussion Forums</h3>
-              <p className="text-muted-foreground">
-                Engage in meaningful conversations about various mental health and wellness topics.
-              </p>
-            </div>
-            <div className="bg-background rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-              <Users className="h-10 w-10 text-akili-orange mb-4" />
-              <h3 className="text-xl font-medium mb-2">Support Groups</h3>
-              <p className="text-muted-foreground">
-                Join specific support groups based on shared experiences or mental health challenges.
-              </p>
-            </div>
-            <div className="bg-background rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-              <Heart className="h-10 w-10 text-akili-orange mb-4" />
-              <h3 className="text-xl font-medium mb-2">Peer Support</h3>
-              <p className="text-muted-foreground">
-                Connect one-on-one with others who understand what you're going through.
-              </p>
-            </div>
-            <div className="bg-background rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow">
-              <Shield className="h-10 w-10 text-akili-orange mb-4" />
-              <h3 className="text-xl font-medium mb-2">Safe Environment</h3>
-              <p className="text-muted-foreground">
-                Our community is carefully moderated to ensure a respectful and supportive atmosphere.
-              </p>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Community Guidelines Preview */}
         <div className="mt-20 bg-secondary/70 p-8 rounded-2xl">
           <div className="flex items-start gap-6">
             <div className="hidden md:flex mt-2">
-              <Lock className="h-12 w-12 text-akili-purple" />
+              <Shield className="h-12 w-12 text-akili-purple" />
             </div>
             <div>
               <h2 className="text-2xl font-bold mb-4 flex items-center">
-                <Lock className="h-6 w-6 text-akili-purple mr-2 md:hidden" />
+                <Shield className="h-6 w-6 text-akili-purple mr-2 md:hidden" />
                 Community Guidelines
               </h2>
               <p className="text-muted-foreground mb-6">
-                Our community will be governed by these core principles to ensure everyone feels safe and respected:
+                Our community is governed by these core principles to ensure everyone feels safe and respected:
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start">
@@ -223,19 +456,17 @@ const CommunityPage = () => {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div className="mt-20 text-center">
-          <h2 className="text-2xl font-bold mb-4">Join the Waitlist Today</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Be the first to experience our supportive community when it launches. Early members will get exclusive access to special features and events.
-          </p>
-          <Button size="lg" className="rounded-full px-8" onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}>
-            <Mail className="w-5 h-5 mr-2" />
-            Sign Up for Updates
-          </Button>
-        </div>
+        {/* Call to Action - for non-signed in users */}
+        {!user && (
+          <div className="mt-12 text-center">
+            <Button size="lg" className="rounded-full px-8" onClick={() => {
+              window.location.href = "/auth";
+            }}>
+              <User className="w-5 h-5 mr-2" />
+              Sign Up Now
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
