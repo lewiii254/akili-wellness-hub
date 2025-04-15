@@ -106,63 +106,80 @@ const Navbar = () => {
           )}
         </div>
       </nav>
-      {/* Improved Mobile menu with better visibility and no scrolling needed */}
+      {/* Full-screen mobile menu with improved visibility */}
       <div
         className={cn(
-          "fixed inset-0 top-16 bg-background lg:hidden z-50 transition-all duration-300 ease-in-out transform",
+          "fixed inset-0 top-16 bg-background/95 lg:hidden z-50 transition-all duration-300 ease-in-out transform",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="fixed inset-0 top-16 flex flex-col p-4 bg-white dark:bg-gray-900 shadow-xl overflow-hidden">
-          <div className="grid grid-cols-1 gap-3 w-full">
+        <div className="fixed inset-0 top-16 flex flex-col p-4 max-h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 shadow-xl">
+          {/* Navigation links */}
+          <div className="flex flex-col space-y-3 pb-4">
+            <h3 className="font-semibold text-lg px-2 mb-1">Navigation</h3>
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className="flex items-center gap-3 p-3 rounded-md bg-primary/10 hover:bg-primary/20 text-foreground font-medium border border-primary/20 transition-colors"
+                className="flex items-center gap-3 p-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-foreground font-medium border border-primary/20 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <item.icon className="w-5 h-5 text-primary" />
-                {item.name}
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-lg">{item.name}</span>
               </Link>
             ))}
-            <div className="border-t mt-2 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          </div>
+          
+          {/* Account actions */}
+          <div className="border-t mt-2 pt-4">
+            <h3 className="font-semibold text-lg px-2 mb-3">Account</h3>
+            <div className="grid grid-cols-1 gap-3">
               <Link to="/chat" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" size="default" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20">
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Chat with AI
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20 h-14"
+                >
+                  <MessageCircle className="w-5 h-5 mr-3" />
+                  <span className="text-base">Chat with AI</span>
                 </Button>
               </Link>
+              
               {user ? (
                 <>
                   <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="default" className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20">
-                      <User className="w-5 h-5 mr-2" />
-                      Profile
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full bg-white dark:bg-gray-800 text-foreground shadow-sm border border-primary/20 h-14"
+                    >
+                      <User className="w-5 h-5 mr-3" />
+                      <span className="text-base">Profile</span>
                     </Button>
                   </Link>
                   <Button 
                     variant="default" 
-                    size="default" 
-                    className="w-full col-span-full" 
+                    size="lg" 
+                    className="w-full h-14"
                     onClick={() => {
                       handleSignOut();
                       setMobileMenuOpen(false);
                     }}
                   >
-                    <LogOut className="w-5 h-5 mr-2" />
-                    Sign Out
+                    <LogOut className="w-5 h-5 mr-3" />
+                    <span className="text-base">Sign Out</span>
                   </Button>
                 </>
               ) : (
                 <Link 
                   to="/auth" 
-                  className="col-span-full"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Button variant="default" size="default" className="w-full">
-                    <User className="w-5 h-5 mr-2" />
-                    Sign In
+                  <Button variant="default" size="lg" className="w-full h-14">
+                    <User className="w-5 h-5 mr-3" />
+                    <span className="text-base">Sign In</span>
                   </Button>
                 </Link>
               )}

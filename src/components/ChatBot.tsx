@@ -9,21 +9,57 @@ import {
   X,
   Sparkles,
   ChevronDown,
+  Brain,
+  Heart,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mental health focused bot responses
+// Enhanced mental health focused bot responses with more personalized and supportive content
 const botResponses = [
+  // General support messages
   "I'm here to support your mental wellbeing. What's on your mind today?",
   "Remember that it's okay to not be okay sometimes. Would you like some self-care techniques?",
   "Taking small steps for your mental health can make a big difference. Have you tried any mindfulness exercises lately?",
-  "It sounds like you're going through a challenging time. Remember that seeking help is a sign of strength, not weakness.",
-  "Deep breathing can help in moments of anxiety - would you like me to guide you through a simple breathing exercise?",
+  
+  // Anxiety and stress responses
+  "It sounds like you're feeling anxious. Let's try a quick grounding technique: name 5 things you can see, 4 things you can touch, 3 things you can hear, 2 things you can smell, and 1 thing you can taste.",
+  "Deep breathing can help in moments of anxiety. Try breathing in for 4 counts, hold for 2, and exhale for 6. Would you like to try this together?",
+  "Stress affects our mind and body. What physical sensations are you noticing right now? Sometimes being aware of them can help us manage them better.",
+  
+  // Depression and mood support
+  "On difficult days, even small accomplishments matter. What's one small thing you did today that you can acknowledge?",
+  "Depression can make everything feel overwhelming. Let's break things down into smaller, manageable steps. What's one tiny thing you could do for yourself today?",
+  "Your feelings are valid, and you're not alone in experiencing them. Many people go through similar struggles with their mental health.",
+  
+  // Self-care suggestions
+  "Self-care is essential for mental wellbeing. This could mean taking a walk, reading a book, or just sitting quietly for a few minutes. What form of self-care appeals to you today?",
   "Getting enough sleep is crucial for mental health. Would you like some tips for better sleep habits?",
-  "Sometimes a change in perspective can help. Let's try to look at this situation from a different angle.",
-  "Physical activity can boost your mood by releasing endorphins. Even a short walk can make a difference.",
-  "It's important to be kind to yourself during difficult times. Self-compassion is a powerful healing tool.",
-  "Connecting with others can help improve your mental wellbeing. Is there someone you could reach out to today?",
+  "Physical activity, even just a short walk, can boost your mood by releasing endorphins. Have you moved your body today?",
+  
+  // Connection and support
+  "Connecting with others can help improve your mental wellbeing. Is there someone supportive you could reach out to today?",
+  "It's important to be kind to yourself during difficult times. How would you comfort a friend going through what you're experiencing?",
+  "Remember that seeking help is a sign of strength, not weakness. Professional support can make a big difference in your mental health journey.",
+];
+
+// Mental health resources
+const mentalHealthResources = [
+  {
+    title: "Crisis Support",
+    description: "If you're in crisis, text HOME to 741741 to reach a crisis counselor.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Mindfulness Techniques",
+    description: "Practice mindfulness to reduce stress and improve focus.",
+    icon: Brain,
+  },
+  {
+    title: "Self-Care Ideas",
+    description: "Simple daily activities to support your mental wellbeing.",
+    icon: Heart,
+  },
 ];
 
 interface Message {
@@ -31,6 +67,7 @@ interface Message {
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
+  resources?: boolean;
 }
 
 const ChatBot = () => {
@@ -45,6 +82,7 @@ const ChatBot = () => {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [name, setName] = useState("");
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -65,33 +103,69 @@ const ChatBot = () => {
       sender: "user",
       timestamp: new Date(),
     };
+    
     setMessages([...messages, userMessage]);
     setInputValue("");
     setIsTyping(true);
 
     // Process user message for mental health context
     const userText = inputValue.toLowerCase();
-    let responseIndex = Math.floor(Math.random() * botResponses.length);
     
-    // Simple keyword detection for more relevant responses
-    if (userText.includes("anxious") || userText.includes("anxiety") || userText.includes("worried")) {
-      responseIndex = 4; // Deep breathing suggestion
-    } else if (userText.includes("sleep") || userText.includes("tired")) {
-      responseIndex = 5; // Sleep tips
-    } else if (userText.includes("sad") || userText.includes("depressed") || userText.includes("unhappy")) {
-      responseIndex = 3; // Support message
-    } else if (userText.includes("alone") || userText.includes("lonely")) {
-      responseIndex = 9; // Connection suggestion
+    // If this is the first interaction and we don't have a name yet, try to extract it
+    if (!name && (userText.includes("i am") || userText.includes("my name") || userText.includes("i'm") || messages.length < 3)) {
+      const nameMatches = userText.match(/(?:i am|my name is|i'm) ([a-z]+)/i);
+      if (nameMatches && nameMatches[1]) {
+        setName(nameMatches[1].charAt(0).toUpperCase() + nameMatches[1].slice(1));
+      }
+    }
+    
+    // More sophisticated keyword detection for relevant responses
+    let responseIndex: number;
+    let showResources = false;
+    
+    if (userText.includes("anxious") || userText.includes("anxiety") || userText.includes("worried") || userText.includes("stress")) {
+      responseIndex = Math.floor(Math.random() * 3) + 3; // Anxiety and stress responses
+      showResources = true;
+    } else if (userText.includes("sad") || userText.includes("depress") || userText.includes("unhappy") || userText.includes("down")) {
+      responseIndex = Math.floor(Math.random() * 3) + 6; // Depression responses
+      showResources = true;
+    } else if (userText.includes("sleep") || userText.includes("tired") || userText.includes("rest") || userText.includes("exhaust")) {
+      responseIndex = 10; // Sleep tips
+    } else if (userText.includes("alone") || userText.includes("lonely") || userText.includes("no one") || userText.includes("isolated")) {
+      responseIndex = 12; // Connection suggestion
+      showResources = true;
+    } else if (userText.includes("help") || userText.includes("resource") || userText.includes("support")) {
+      responseIndex = 14; // Professional help
+      showResources = true;
+    } else {
+      // General responses if no specific keywords are detected
+      responseIndex = Math.floor(Math.random() * 3);
     }
 
     // Simulate bot response after a short delay
     setTimeout(() => {
+      // Personalize response with name if available
+      let botResponse = botResponses[responseIndex];
+      if (name) {
+        botResponse = botResponse.replace("Would you", `${name}, would you`);
+        
+        // Only add name at the beginning if it doesn't already contain it
+        if (!botResponse.includes(name)) {
+          const sentenceEnd = botResponse.indexOf(". ");
+          if (sentenceEnd > 0 && sentenceEnd < 30) {
+            botResponse = botResponse.substring(0, sentenceEnd + 2) + `${name}, ` + botResponse.substring(sentenceEnd + 2);
+          }
+        }
+      }
+      
       const botMessage: Message = {
         id: messages.length + 2,
-        text: botResponses[responseIndex],
+        text: botResponse,
         sender: "bot",
         timestamp: new Date(),
+        resources: showResources
       };
+      
       setMessages((prevMessages) => [...prevMessages, botMessage]);
       setIsTyping(false);
     }, 1500);
@@ -138,23 +212,45 @@ const ChatBot = () => {
           {/* Chat messages */}
           <div className="h-96 overflow-y-auto p-4 bg-white dark:bg-gray-900 flex flex-col space-y-4">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "max-w-[85%] p-3 rounded-2xl",
-                  message.sender === "user"
-                    ? "bg-primary text-primary-foreground self-end rounded-br-none"
-                    : "bg-secondary text-secondary-foreground self-start rounded-bl-none"
+              <React.Fragment key={message.id}>
+                <div
+                  className={cn(
+                    "max-w-[85%] p-3 rounded-2xl",
+                    message.sender === "user"
+                      ? "bg-primary text-primary-foreground self-end rounded-br-none"
+                      : "bg-secondary text-secondary-foreground self-start rounded-bl-none"
+                  )}
+                >
+                  <p className="text-sm">{message.text}</p>
+                  <p className="text-xs mt-1 opacity-70">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                
+                {/* Show resources if indicated */}
+                {message.resources && (
+                  <div className="self-start max-w-[90%] mt-2 mb-1">
+                    <p className="text-xs text-muted-foreground mb-2">Resources that might help:</p>
+                    <div className="space-y-2">
+                      {mentalHealthResources.map((resource, index) => (
+                        <div 
+                          key={index}
+                          className="bg-secondary/30 rounded-lg p-2 flex items-start gap-2 border border-primary/10 hover:bg-secondary/50 transition-colors cursor-pointer"
+                        >
+                          <resource.icon className="w-4 h-4 text-primary mt-0.5" />
+                          <div>
+                            <p className="text-xs font-medium">{resource.title}</p>
+                            <p className="text-xs text-muted-foreground">{resource.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              >
-                <p className="text-sm">{message.text}</p>
-                <p className="text-xs mt-1 opacity-70">
-                  {message.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
+              </React.Fragment>
             ))}
             {isTyping && (
               <div className="max-w-[85%] p-3 rounded-2xl bg-secondary text-secondary-foreground self-start rounded-bl-none">
