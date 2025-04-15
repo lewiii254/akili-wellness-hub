@@ -92,6 +92,7 @@
   }
 }
 
+/* Background Gradients */
 .gradient-bg {
   background: linear-gradient(135deg, hsl(var(--background)), hsl(275, 95%, 97%));
   background-size: 200% 200%;
@@ -100,6 +101,12 @@
 
 .gradient-card {
   background: linear-gradient(135deg, rgba(142, 57, 227, 0.2), rgba(14, 165, 233, 0.15));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gradient-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(142, 57, 227, 0.2);
 }
 
 .gradient-card-resources {
@@ -118,11 +125,18 @@
   background: linear-gradient(135deg, rgba(254, 198, 161, 0.8), rgba(249, 115, 22, 0.3));
 }
 
+/* Glass effect with improved styling */
 .glass-effect {
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.dark .glass-effect {
+  background-color: rgba(30, 30, 40, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Improved mobile sidebar visibility */
@@ -130,6 +144,11 @@
   @apply text-gray-800 bg-white hover:bg-primary/20 shadow-sm border border-gray-100;
 }
 
+.dark .mobile-nav-link {
+  @apply text-gray-100 bg-gray-800 hover:bg-primary/30 border-gray-700;
+}
+
+/* Animations */
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
@@ -142,6 +161,55 @@
   }
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation Classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animate-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animate-delay-500 {
+  animation-delay: 500ms;
+}
+
 /* Fix for mobile menu visibility */
 @media (max-width: 1024px) {
   .mobile-menu-visible {
@@ -151,16 +219,41 @@
   .mobile-menu-link {
     @apply bg-white text-foreground shadow-sm border border-gray-100;
   }
+  
+  .dark .mobile-menu-visible {
+    @apply bg-gray-900 shadow-lg;
+  }
+  
+  .dark .mobile-menu-link {
+    @apply bg-gray-800 text-gray-100 shadow-sm border border-gray-700;
+  }
 }
 
-/* Add some hover and active effects */
-button:hover {
-  transform: translateY(-1px);
-  transition: transform 0.2s ease;
+/* Interactive elements */
+.interactive-hover {
+  transition: all 0.3s ease;
 }
 
-button:active {
+.interactive-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Improved buttons */
+button, .button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover, .button:hover {
+  transform: translateY(-2px);
+}
+
+button:active, .button:active {
   transform: translateY(1px);
+}
+
+button.glow:hover, .button.glow:hover {
+  box-shadow: 0 0 15px rgba(142, 57, 227, 0.5);
 }
 
 /* Improved scrollbar */
@@ -199,4 +292,20 @@ button:active {
 
 .animate-pulse-gentle {
   animation: pulse-gentle 2s infinite;
+}
+
+/* Special text effects */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-akili-purple to-akili-blue;
+}
+
+/* Emoji animations */
+.emoji-bounce {
+  display: inline-block;
+  animation: bounce 1s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }

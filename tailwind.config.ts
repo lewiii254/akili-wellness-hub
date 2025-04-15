@@ -118,7 +118,19 @@ export default {
 				'shimmer': {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' },
-				}
+				},
+				'bounce': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-6px)' },
+				},
+				'spin-slow': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' },
+				},
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -127,6 +139,9 @@ export default {
 				'float': 'float 6s ease-in-out infinite',
 				'glow': 'glow 2s ease-in-out infinite',
 				'shimmer': 'shimmer 2s linear infinite',
+				'bounce': 'bounce 1s ease infinite',
+				'spin-slow': 'spin-slow 8s linear infinite',
+				'fade-in': 'fade-in 0.5s ease-out forwards',
 			},
 			fontFamily: {
 				poppins: ['Poppins', 'sans-serif'],
