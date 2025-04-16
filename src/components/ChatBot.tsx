@@ -13,7 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 // Enhanced mental health focused bot responses with more personalized and supportive content
 const botResponses = [
