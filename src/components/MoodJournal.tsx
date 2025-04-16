@@ -1,15 +1,32 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const MoodJournal = () => {
   const [entry, setEntry] = useState("");
   const [aiSuggestion, setAiSuggestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const processWithAI = async (content: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('process-journal', {
+        body: { content }
+      });
+
+      if (error) throw error;
+      return data.suggestion;
+    } catch (error) {
+      console.error('Error processing with AI:', error);
+      throw error;
+    }
+  };
 
   const handleGetAISuggestion = async () => {
     if (!entry) {
@@ -22,21 +39,21 @@ const MoodJournal = () => {
     }
 
     setIsLoading(true);
-    // This is a placeholder for the AI integration
-    // In a real implementation, you would call your AI service here
-    setTimeout(() => {
-      const suggestions = [
-        "Try taking a few deep breaths and practice mindfulness.",
-        "Consider going for a short walk to clear your mind.",
-        "Maybe reach out to a friend or family member for support.",
-        "Remember that it's okay to feel this way, and these feelings will pass."
-      ];
-      setAiSuggestion(suggestions[Math.floor(Math.random() * suggestions.length)]);
+    try {
+      const suggestion = await processWithAI(entry);
+      setAiSuggestion(suggestion);
+    } catch (error) {
+      toast({
+        title: "Error getting AI suggestion",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!entry) {
       toast({
         title: "Empty entry",
@@ -46,12 +63,43 @@ const MoodJournal = () => {
       return;
     }
 
-    toast({
-      title: "Journal Entry Saved! 📝",
-      description: "Your thoughts have been recorded successfully.",
-    });
-    setEntry("");
-    setAiSuggestion("");
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to save journal entries.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('mood_journal_entries')
+        .insert({
+          content: entry,
+          ai_suggestion: aiSuggestion,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Journal Entry Saved! 📝",
+        description: "Your thoughts have been recorded successfully.",
+      });
+      
+      setEntry("");
+      setAiSuggestion("");
+    } catch (error) {
+      toast({
+        title: "Error saving entry",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,7 +112,12 @@ const MoodJournal = () => {
       />
       
       <div className="flex gap-2 flex-wrap">
-        <Button onClick={handleSave} className="flex items-center gap-2">
+        <Button 
+          onClick={handleSave} 
+          className="flex items-center gap-2"
+          disabled={isLoading}
+        >
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Save Entry 📝
         </Button>
         <Button 
@@ -73,8 +126,12 @@ const MoodJournal = () => {
           disabled={isLoading}
           className="flex items-center gap-2"
         >
-          <Lightbulb className="h-4 w-4" />
-          {isLoading ? "Thinking..." : "Get AI Suggestion"}
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Lightbulb className="h-4 w-4" />
+          )}
+          Get AI Suggestion
         </Button>
       </div>
 

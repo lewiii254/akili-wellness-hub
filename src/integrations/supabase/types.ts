@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      mood_journal_entries: {
+        Row: {
+          ai_suggestion: string | null
+          content: string
+          created_at: string
+          id: string
+          mood_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_suggestion?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          mood_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_suggestion?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          mood_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 // Enhanced mental health focused bot responses with more personalized and supportive content
 const botResponses = [
@@ -92,11 +92,24 @@ const ChatBot = () => {
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const processWithAI = async (message: string, previousMessages: Message[]) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-response', {
+        body: { message, previousMessages }
+      });
+
+      if (error) throw error;
+      return data.response;
+    } catch (error) {
+      console.error('Error processing with AI:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    // Add user message
     const userMessage: Message = {
       id: messages.length + 1,
       text: inputValue,
@@ -104,71 +117,32 @@ const ChatBot = () => {
       timestamp: new Date(),
     };
     
-    setMessages([...messages, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     setIsTyping(true);
 
-    // Process user message for mental health context
-    const userText = inputValue.toLowerCase();
-    
-    // If this is the first interaction and we don't have a name yet, try to extract it
-    if (!name && (userText.includes("i am") || userText.includes("my name") || userText.includes("i'm") || messages.length < 3)) {
-      const nameMatches = userText.match(/(?:i am|my name is|i'm) ([a-z]+)/i);
-      if (nameMatches && nameMatches[1]) {
-        setName(nameMatches[1].charAt(0).toUpperCase() + nameMatches[1].slice(1));
-      }
-    }
-    
-    // More sophisticated keyword detection for relevant responses
-    let responseIndex: number;
-    let showResources = false;
-    
-    if (userText.includes("anxious") || userText.includes("anxiety") || userText.includes("worried") || userText.includes("stress")) {
-      responseIndex = Math.floor(Math.random() * 3) + 3; // Anxiety and stress responses
-      showResources = true;
-    } else if (userText.includes("sad") || userText.includes("depress") || userText.includes("unhappy") || userText.includes("down")) {
-      responseIndex = Math.floor(Math.random() * 3) + 6; // Depression responses
-      showResources = true;
-    } else if (userText.includes("sleep") || userText.includes("tired") || userText.includes("rest") || userText.includes("exhaust")) {
-      responseIndex = 10; // Sleep tips
-    } else if (userText.includes("alone") || userText.includes("lonely") || userText.includes("no one") || userText.includes("isolated")) {
-      responseIndex = 12; // Connection suggestion
-      showResources = true;
-    } else if (userText.includes("help") || userText.includes("resource") || userText.includes("support")) {
-      responseIndex = 14; // Professional help
-      showResources = true;
-    } else {
-      // General responses if no specific keywords are detected
-      responseIndex = Math.floor(Math.random() * 3);
-    }
-
-    // Simulate bot response after a short delay
-    setTimeout(() => {
-      // Personalize response with name if available
-      let botResponse = botResponses[responseIndex];
-      if (name) {
-        botResponse = botResponse.replace("Would you", `${name}, would you`);
-        
-        // Only add name at the beginning if it doesn't already contain it
-        if (!botResponse.includes(name)) {
-          const sentenceEnd = botResponse.indexOf(". ");
-          if (sentenceEnd > 0 && sentenceEnd < 30) {
-            botResponse = botResponse.substring(0, sentenceEnd + 2) + `${name}, ` + botResponse.substring(sentenceEnd + 2);
-          }
-        }
-      }
+    try {
+      const response = await processWithAI(inputValue, messages);
       
       const botMessage: Message = {
         id: messages.length + 2,
-        text: botResponse,
+        text: response,
         sender: "bot",
         timestamp: new Date(),
-        resources: showResources
       };
       
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: messages.length + 2,
+        text: "I apologize, but I'm having trouble responding right now. Please try again later.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
