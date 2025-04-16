@@ -1,0 +1,430 @@
+
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
+import { Flag, Loader2, AlertTriangle, Check, X } from "lucide-react";
+
+interface ContentFlag {
+  id: string;
+  content_type: string;
+  content_id: string;
+  reporter_id: string | null;
+  reason: string;
+  status: string;
+  created_at: string;
+  resolved_by: string | null;
+  resolution_notes: string | null;
+  reporter_email?: string;
+  content_title?: string;
+  content_preview?: string;
+}
+
+const ContentModeration = () => {
+  const { user } = useAuth();
+  const [flags, setFlags] = useState<ContentFlag[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [currentFlag, setCurrentFlag] = useState<ContentFlag | null>(null);
+  const [resolutionNotes, setResolutionNotes] = useState("");
+  const [resolutionStatus, setResolutionStatus] = useState("resolved");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchFlags();
+  }, [statusFilter]);
+
+  const fetchFlags = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('content_flags')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Filter by status if needed
+      const filteredFlags = statusFilter === "all" 
+        ? data 
+        : data.filter(flag => flag.status === statusFilter);
+
+      // Enhance the flags with additional data
+      const enhancedFlags = await Promise.all(
+        filteredFlags.map(async (flag) => {
+          // Get reporter information
+          let reporterEmail = "Anonymous";
+          if (flag.reporter_id) {
+            const { data: userData } = await supabase.auth.admin.getUserById(flag.reporter_id);
+            reporterEmail = userData?.user?.email || "Unknown";
+          }
+          
+          // Get content information based on content_type
+          let contentTitle = "Unknown Content";
+          let contentPreview = "";
+          
+          if (flag.content_type === 'discussion') {
+            const { data: discussionData } = await supabase
+              .from('community_discussions')
+              .select('title, content')
+              .eq('id', flag.content_id)
+              .single();
+              
+            if (discussionData) {
+              contentTitle = discussionData.title;
+              contentPreview = discussionData.content.substring(0, 100) + '...';
+            }
+          } else if (flag.content_type === 'journal') {
+            const { data: journalData } = await supabase
+              .from('mood_journal_entries')
+              .select('content')
+              .eq('id', flag.content_id)
+              .single();
+              
+            if (journalData) {
+              contentTitle = "Journal Entry";
+              contentPreview = journalData.content.substring(0, 100) + '...';
+            }
+          }
+          
+          return {
+            ...flag,
+            reporter_email: reporterEmail,
+            content_title: contentTitle,
+            content_preview: contentPreview
+          };
+        })
+      );
+      
+      setFlags(enhancedFlags);
+    } catch (error) {
+      console.error("Error fetching flags:", error);
+      toast({
+        title: "Error loading reports",
+        description: "Could not load content flags",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResolveFlag = async () => {
+    if (!currentFlag || !user?.id) return;
+    
+    setSubmitting(true);
+    try {
+      // Update flag status
+      const { error: flagError } = await supabase
+        .from('content_flags')
+        .update({
+          status: resolutionStatus,
+          resolved_by: user.id,
+          resolution_notes: resolutionNotes
+        })
+        .eq('id', currentFlag.id);
+        
+      if (flagError) throw flagError;
+      
+      // If content is to be removed/hidden
+      if (resolutionStatus === 'content_removed' && currentFlag.content_type === 'discussion') {
+        const { error: contentError } = await supabase
+          .from('community_discussions')
+          .update({ is_hidden: true })
+          .eq('id', currentFlag.content_id);
+          
+        if (contentError) throw contentError;
+      }
+      
+      toast({
+        title: "Report resolved",
+        description: "The content flag has been resolved",
+      });
+      
+      // Refresh data and close dialog
+      fetchFlags();
+      setCurrentFlag(null);
+      setResolutionNotes("");
+      setResolutionStatus("resolved");
+    } catch (error) {
+      console.error("Error resolving flag:", error);
+      toast({
+        title: "Error resolving report",
+        description: "Could not update the content flag",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Pending</Badge>;
+      case 'resolved':
+        return <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Resolved</Badge>;
+      case 'content_removed':
+        return <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Content Removed</Badge>;
+      case 'dismissed':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">Dismissed</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold flex items-center">
+        <Flag className="mr-2 h-6 w-6" />
+        Content Moderation
+      </h2>
+      <p className="text-muted-foreground">
+        Review and address reported content across the platform
+      </p>
+
+      <div className="flex justify-between items-center">
+        <Select
+          value={statusFilter}
+          onValueChange={setStatusFilter}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Reports</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="resolved">Resolved</SelectItem>
+            <SelectItem value="content_removed">Content Removed</SelectItem>
+            <SelectItem value="dismissed">Dismissed</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button
+          variant="outline"
+          onClick={fetchFlags}
+          disabled={loading}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+        </Button>
+      </div>
+
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Content Type</TableHead>
+              <TableHead>Reason</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Reported</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : flags.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center">
+                  No flags found
+                </TableCell>
+              </TableRow>
+            ) : (
+              flags.map((flag) => (
+                <TableRow key={flag.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{flag.content_type.charAt(0).toUpperCase() + flag.content_type.slice(1)}</div>
+                      <div className="text-sm text-muted-foreground">{flag.content_title}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="line-clamp-2">{flag.reason}</span>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(flag.status)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div>{new Date(flag.created_at).toLocaleDateString()}</div>
+                      <div className="text-muted-foreground">{flag.reporter_email}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentFlag(flag)}
+                      disabled={flag.status !== 'pending'}
+                    >
+                      {flag.status === 'pending' ? 'Review' : 'View Details'}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Content Review Dialog */}
+      <Dialog open={!!currentFlag} onOpenChange={(open) => !open && setCurrentFlag(null)}>
+        <DialogContent className="max-w-md md:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Review Reported Content</DialogTitle>
+            <DialogDescription>
+              Review the reported content and take appropriate action
+            </DialogDescription>
+          </DialogHeader>
+          
+          {currentFlag && (
+            <>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Content Type</h4>
+                    <p>{currentFlag.content_type.charAt(0).toUpperCase() + currentFlag.content_type.slice(1)}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold mb-1">Reported By</h4>
+                    <p>{currentFlag.reporter_email}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-1">Report Reason</h4>
+                  <p className="p-3 bg-secondary/50 rounded-md text-sm">{currentFlag.reason}</p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-1">Content Preview</h4>
+                  <div className="p-3 bg-secondary/30 rounded-md text-sm max-h-40 overflow-y-auto break-words">
+                    <p className="font-medium mb-1">{currentFlag.content_title}</p>
+                    <p>{currentFlag.content_preview}</p>
+                  </div>
+                </div>
+
+                {currentFlag.status === 'pending' && (
+                  <>
+                    <div>
+                      <h4 className="text-sm font-semibold mb-1">Resolution</h4>
+                      <Select
+                        value={resolutionStatus}
+                        onValueChange={setResolutionStatus}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select resolution" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="resolved">
+                            <div className="flex items-center">
+                              <Check className="w-4 h-4 mr-2 text-green-500" />
+                              Resolve (No Action Needed)
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="dismissed">
+                            <div className="flex items-center">
+                              <X className="w-4 h-4 mr-2 text-gray-500" />
+                              Dismiss Report
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="content_removed">
+                            <div className="flex items-center">
+                              <AlertTriangle className="w-4 h-4 mr-2 text-red-500" />
+                              Remove Content
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-semibold mb-1">Notes</h4>
+                      <Textarea
+                        placeholder="Add resolution notes..."
+                        value={resolutionNotes}
+                        onChange={(e) => setResolutionNotes(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {currentFlag.status !== 'pending' && (
+                  <>
+                    <div>
+                      <h4 className="text-sm font-semibold mb-1">Resolution</h4>
+                      <p>{getStatusBadge(currentFlag.status)}</p>
+                    </div>
+                    
+                    {currentFlag.resolution_notes && (
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Resolution Notes</h4>
+                        <p className="p-3 bg-secondary/30 rounded-md text-sm">
+                          {currentFlag.resolution_notes}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <DialogFooter>
+                {currentFlag.status === 'pending' ? (
+                  <Button 
+                    onClick={handleResolveFlag} 
+                    disabled={submitting}
+                    className="w-full sm:w-auto"
+                  >
+                    {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    Submit Resolution
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentFlag(null)}
+                    className="w-full sm:w-auto"
+                  >
+                    Close
+                  </Button>
+                )}
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default ContentModeration;

@@ -1,9 +1,10 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { isAdmin } from "@/utils/adminUtils";
 import {
   Menu,
   X,
@@ -17,6 +18,7 @@ import {
   LogOut,
   Sparkles,
   Sun,
+  Shield,
 } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -33,6 +35,20 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user?.id) {
+        const adminStatus = await isAdmin(user.id);
+        setIsUserAdmin(adminStatus);
+      } else {
+        setIsUserAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -95,6 +111,14 @@ const Navbar = () => {
           </Link>
           {user ? (
             <>
+              {isUserAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" size="sm" className="mr-2">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Link to="/profile">
                 <Button variant="outline" size="sm" className="mr-2">
                   <User className="w-4 h-4 mr-2" />
@@ -165,6 +189,18 @@ const Navbar = () => {
                   
                   {user ? (
                     <>
+                      {isUserAdmin && (
+                        <Link to="/admin">
+                          <Button 
+                            variant="outline" 
+                            size="lg" 
+                            className="w-full justify-start text-foreground bg-secondary/50"
+                          >
+                            <Shield className="w-5 h-5 mr-3" />
+                            <span className="text-lg">Admin Dashboard 🛡️</span>
+                          </Button>
+                        </Link>
+                      )}
                       <Link to="/profile">
                         <Button 
                           variant="outline" 

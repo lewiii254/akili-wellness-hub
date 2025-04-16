@@ -42,8 +42,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, Loader2 } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase";
 
-// Sample community discussions
 const discussions = [
   {
     id: 1,
@@ -77,7 +78,6 @@ const discussions = [
   },
 ];
 
-// Sample upcoming events
 const events = [
   {
     id: 1,
@@ -99,7 +99,6 @@ const events = [
   },
 ];
 
-// Sample support groups
 const supportGroups = [
   {
     id: 1,
@@ -121,6 +120,10 @@ const CommunityPage = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [postContent, setPostContent] = useState("");
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [currentDiscussionId, setCurrentDiscussionId] = useState<number | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
   const { user } = useAuth();
   
   const handleNotifySubmit = (e: React.FormEvent) => {
@@ -176,6 +179,53 @@ const CommunityPage = () => {
       title: "Registration successful",
       description: `You've registered for "${eventTitle}"`,
     });
+  };
+
+  const openReportDialog = (discussionId: number) => {
+    setCurrentDiscussionId(discussionId);
+    setReportDialogOpen(true);
+  };
+
+  const handleSubmitReport = async () => {
+    if (!reportReason.trim() || currentDiscussionId === null) {
+      toast({
+        title: "Report reason required",
+        description: "Please provide a reason for your report.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmittingReport(true);
+    try {
+      const { error } = await supabase
+        .from('content_flags')
+        .insert({
+          content_type: 'discussion',
+          content_id: String(currentDiscussionId),
+          reporter_id: user?.id,
+          reason: reportReason,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Report submitted",
+        description: "Thank you for helping to keep our community safe.",
+      });
+      setReportReason("");
+      setCurrentDiscussionId(null);
+      setReportDialogOpen(false);
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast({
+        title: "Error submitting report",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingReport(false);
+    }
   };
 
   return (
@@ -261,7 +311,16 @@ const CommunityPage = () => {
                           <div className="border-t pt-4">
                             <h4 className="font-medium mb-2">Comments</h4>
                             <Textarea placeholder="Add your comment..." className="mb-2" />
-                            <Button size="sm">Comment</Button>
+                            <div className="flex justify-between">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => openReportDialog(discussion.id)}
+                              >
+                                <Flag className="h-4 w-4 mr-2" /> Report
+                              </Button>
+                              <Button size="sm">Comment</Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -468,6 +527,48 @@ const CommunityPage = () => {
           </div>
         )}
       </div>
+
+      {/* Report Content Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Report Content</DialogTitle>
+            <DialogDescription>
+              Help us maintain a safe community by reporting content that violates our guidelines.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="reason" className="text-sm font-medium">
+                Reason for report
+              </label>
+              <Textarea
+                id="reason"
+                placeholder="Please explain why this content should be reviewed by moderators..."
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitReport} 
+              disabled={submittingReport || !reportReason.trim()}
+            >
+              {submittingReport ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Flag className="h-4 w-4 mr-2" />
+              )}
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
