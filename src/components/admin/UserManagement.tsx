@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -90,12 +89,12 @@ const UserManagement = () => {
       }
 
       // Map roles to users
-      const usersWithRoles: UserWithRoles[] = profiles.map((profile) => {
+      const usersWithRoles: UserWithRoles[] = profiles.map((profile: any) => {
         const userRoles = roles
-          .filter((role) => role.user_id === profile.id)
-          .map((role) => role.role as UserRole);
+          .filter((role: any) => role.user_id === profile.id)
+          .map((role: any) => role.role as UserRole);
           
-        const authUser = authData?.users?.find(u => u.id === profile.id);
+        const authUser = authData?.users?.find((u: any) => u.id === profile.id);
         
         return {
           ...profile,

@@ -19,7 +19,8 @@ import {
   Flag,
   ThumbsUp,
   Clock,
-  User
+  User,
+  Loader2
 } from "lucide-react";
 import {
   Sheet,
@@ -42,8 +43,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useAuth } from "@/hooks/useAuth";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, Loader2 } from "@/components/ui/dialog";
-import { supabase } from "@/lib/supabase";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 const discussions = [
   {
