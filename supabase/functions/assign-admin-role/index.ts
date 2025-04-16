@@ -34,46 +34,73 @@ serve(async (req) => {
       data: { user },
     } = await supabaseClient.auth.getUser();
 
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized', message: 'User not authenticated' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
-    }
+    // Create a supabase admin client with the service role
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    );
 
     // Parse request body
-    const { userId } = await req.json();
+    const { userId, email } = await req.json();
+
+    let targetUserId = userId;
     
-    if (!userId) {
-      // If no userId is provided, use the current user's ID
-      const { error } = await supabaseClient
-        .from('user_roles')
-        .insert({ user_id: user.id, role: 'admin' });
-        
-      if (error) throw error;
+    // If email is provided, find the user by email
+    if (email) {
+      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
       
+      if (userError) throw userError;
+      
+      const foundUser = userData.users.find(u => u.email === email);
+      
+      if (!foundUser) {
+        return new Response(
+          JSON.stringify({ error: "User not found", message: `No user found with email ${email}` }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+        );
+      }
+      
+      targetUserId = foundUser.id;
+    }
+    
+    // If no userId or email is provided, use the current user's ID
+    if (!targetUserId && !email) {
+      if (!user) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized', message: 'User not authenticated' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+        );
+      }
+      targetUserId = user.id;
+    }
+
+    // Check if the role already exists to avoid duplicates
+    const { data: existingRole, error: roleCheckError } = await supabaseAdmin
+      .from('user_roles')
+      .select('*')
+      .eq('user_id', targetUserId)
+      .eq('role', 'admin');
+      
+    if (roleCheckError) throw roleCheckError;
+    
+    if (existingRole && existingRole.length > 0) {
       return new Response(
-        JSON.stringify({ success: true, message: 'Admin role assigned to current user', userId: user.id }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    } else {
-      // Create a supabase service role client to add role to provided userId
-      const supabaseAdmin = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      );
-      
-      const { error } = await supabaseAdmin
-        .from('user_roles')
-        .insert({ user_id: userId, role: 'admin' });
-        
-      if (error) throw error;
-      
-      return new Response(
-        JSON.stringify({ success: true, message: 'Admin role assigned to user', userId }),
+        JSON.stringify({ success: true, message: 'User already has admin role', userId: targetUserId }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    // Assign admin role
+    const { error } = await supabaseAdmin
+      .from('user_roles')
+      .insert({ user_id: targetUserId, role: 'admin' });
+      
+    if (error) throw error;
+    
+    return new Response(
+      JSON.stringify({ success: true, message: 'Admin role assigned successfully', userId: targetUserId }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('Error assigning admin role:', error);
     

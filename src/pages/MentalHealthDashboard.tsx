@@ -49,12 +49,12 @@ const MentalHealthDashboard = () => {
                   Admin Access
                 </CardTitle>
                 <CardDescription>
-                  For testing admin functionality
+                  Grant admin privileges to a user
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-sm text-muted-foreground">
-                  Click the button below to grant yourself admin privileges for testing purposes.
+                  Use this tool to grant admin privileges to an email address (default: ngondimarklewis@gmail.com).
                 </p>
                 <AdminMaker />
               </CardContent>
