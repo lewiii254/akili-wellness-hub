@@ -11,32 +11,47 @@ export type Database = {
     Tables: {
       community_discussions: {
         Row: {
+          author_avatar: string | null
           author_id: string
+          author_name: string | null
           content: string
           created_at: string
           id: string
           is_approved: boolean | null
           is_hidden: boolean | null
+          like_count: number | null
+          reply_count: number | null
+          tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
+          author_avatar?: string | null
           author_id: string
+          author_name?: string | null
           content: string
           created_at?: string
           id?: string
           is_approved?: boolean | null
           is_hidden?: boolean | null
+          like_count?: number | null
+          reply_count?: number | null
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
+          author_avatar?: string | null
           author_id?: string
+          author_name?: string | null
           content?: string
           created_at?: string
           id?: string
           is_approved?: boolean | null
           is_hidden?: boolean | null
+          like_count?: number | null
+          reply_count?: number | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }
@@ -132,6 +147,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_hidden: boolean | null
           mood_score: number | null
           updated_at: string
           user_id: string
@@ -141,6 +157,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_hidden?: boolean | null
           mood_score?: number | null
           updated_at?: string
           user_id: string
@@ -150,6 +167,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_hidden?: boolean | null
           mood_score?: number | null
           updated_at?: string
           user_id?: string
@@ -160,6 +178,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -168,6 +187,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -176,6 +196,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -123,7 +122,7 @@ const ContentModeration = () => {
             // Modified: Check if profiles table has the necessary fields
             const { data: profileData, error: profileError } = await supabase
               .from('profiles')
-              .select('*')
+              .select('first_name, last_name')
               .eq('id', flag.reporter_id)
               .single();
               
@@ -133,10 +132,9 @@ const ContentModeration = () => {
               // Safely access the fields
               const firstName = profileData.first_name || '';
               const lastName = profileData.last_name || '';
-              const email = profileData.email || '';
               
               const fullName = `${firstName} ${lastName}`.trim();
-              reporterEmail = fullName || email || "Anonymous User";
+              reporterEmail = fullName || "Anonymous User";
             }
           }
           
@@ -224,12 +222,10 @@ const ContentModeration = () => {
             
           if (contentError) throw contentError;
         } else if (currentFlag.content_type === 'journal') {
-          // Updated to match the mood_journal_entries schema
+          // Use the correct update object with is_hidden
           const { error: journalError } = await supabase
             .from('mood_journal_entries')
-            .update({
-              is_hidden: true
-            })
+            .update({ is_hidden: true })
             .eq('id', currentFlag.content_id);
             
           if (journalError) throw journalError;

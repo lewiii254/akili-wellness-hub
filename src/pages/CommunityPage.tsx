@@ -201,7 +201,9 @@ const CommunityPage = () => {
         const formattedDiscussions: Discussion[] = data.map(item => {
           let tags: string[] = [];
           try {
-            if (typeof item.tags === 'string') {
+            if (item.tags === null) {
+              tags = [];
+            } else if (typeof item.tags === 'string') {
               tags = JSON.parse(item.tags);
             } else if (Array.isArray(item.tags)) {
               tags = item.tags;
@@ -234,7 +236,7 @@ const CommunityPage = () => {
             date: dateString,
             replies: item.reply_count || 0,
             likes: item.like_count || 0,
-            tags: item.tags || [],
+            tags: tags || [],
             authorAvatar: item.author_avatar || `https://i.pravatar.cc/150?u=${item.id}`,
             author_id: item.author_id,
             author_name: item.author_name,
@@ -520,7 +522,7 @@ const CommunityPage = () => {
                             <div className="flex-1">
                               <h4 className="font-semibold text-lg mb-1">{discussion.title}</h4>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {discussion.tags.map((tag, index) => (
+                                {discussion.tags && discussion.tags.map((tag, index) => (
                                   <Badge key={`${discussion.id}-tag-${index}`} variant="outline" className="bg-secondary/30">
                                     {tag}
                                   </Badge>
