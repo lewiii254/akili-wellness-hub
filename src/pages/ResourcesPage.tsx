@@ -9,9 +9,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ResourceCard from "@/components/ResourceCard";
-import { Search } from "lucide-react";
+import { Search, Plus, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
 
-// Mock data for resources
+// Expanded mock data for resources
 const resourcesData = [
   {
     id: 1,
@@ -22,6 +27,7 @@ const resourcesData = [
     timeToRead: "15 min read",
     image: "https://images.unsplash.com/photo-1490131784822-b4626a8ec96a?q=80&w=2070&auto=format&fit=crop",
     link: "#",
+    rating: 4.7,
   },
   {
     id: 2,
@@ -32,6 +38,7 @@ const resourcesData = [
     timeToRead: "10 min read",
     image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2022&auto=format&fit=crop",
     link: "#",
+    rating: 4.5,
   },
   {
     id: 3,
@@ -42,6 +49,7 @@ const resourcesData = [
     timeToRead: "12 min read",
     image: "https://images.unsplash.com/photo-1514845505178-849cebf1a91d?q=80&w=1974&auto=format&fit=crop",
     link: "#",
+    rating: 4.8,
   },
   {
     id: 4,
@@ -52,6 +60,7 @@ const resourcesData = [
     timeToRead: "8 min read",
     image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=2070&auto=format&fit=crop",
     link: "#",
+    rating: 4.2,
   },
   {
     id: 5,
@@ -62,6 +71,7 @@ const resourcesData = [
     timeToRead: "10 min read",
     image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=2060&auto=format&fit=crop",
     link: "#",
+    rating: 4.6,
   },
   {
     id: 6,
@@ -72,6 +82,40 @@ const resourcesData = [
     timeToRead: "14 min read",
     image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1974&auto=format&fit=crop",
     link: "#",
+    rating: 4.4,
+  },
+  {
+    id: 7,
+    title: "Cognitive Behavioral Therapy: Core Principles",
+    description:
+      "An introduction to CBT techniques that can help you identify and change negative thought patterns.",
+    category: "Therapy",
+    timeToRead: "18 min read",
+    image: "https://images.unsplash.com/photo-1493723843671-1d655e66ac1c?q=80&w=2070&auto=format&fit=crop",
+    link: "#",
+    rating: 4.9,
+  },
+  {
+    id: 8,
+    title: "Managing Social Anxiety in Group Settings",
+    description:
+      "Practical strategies for coping with social anxiety and building confidence in social situations.",
+    category: "Anxiety",
+    timeToRead: "12 min read",
+    image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=2070&auto=format&fit=crop",
+    link: "#",
+    rating: 4.3,
+  },
+  {
+    id: 9,
+    title: "Nutrition and Mental Health: The Food-Mood Connection",
+    description:
+      "Discover how your diet affects your mental health and which foods can boost your mood and cognitive function.",
+    category: "Wellness",
+    timeToRead: "16 min read",
+    image: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?q=80&w=2012&auto=format&fit=crop",
+    link: "#",
+    rating: 4.5,
   },
 ];
 
@@ -84,11 +128,16 @@ const categories = [
   "Resilience",
   "Sleep",
   "Relationships",
+  "Therapy",
+  "Wellness",
 ];
 
 const ResourcesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [showCommunityDialog, setShowCommunityDialog] = useState(false);
+  const [communityPost, setCommunityPost] = useState({ title: "", content: "" });
+  const navigate = useNavigate();
 
   // Filter resources based on search query and selected category
   const filteredResources = resourcesData.filter((resource) => {
@@ -106,6 +155,31 @@ const ResourcesPage = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const handleCommunityPost = () => {
+    if (!communityPost.title || !communityPost.content) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a title and content for your post.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Here we would typically save the post to the database
+    // For now, we'll just show a success message and redirect to community
+    toast({
+      title: "Post created!",
+      description: "Your post has been successfully shared with the community.",
+    });
+
+    // Clear form and close dialog
+    setCommunityPost({ title: "", content: "" });
+    setShowCommunityDialog(false);
+    
+    // Navigate to community page
+    navigate("/community");
+  };
+
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 gradient-bg">
       <div className="max-w-7xl mx-auto">
@@ -118,9 +192,9 @@ const ResourcesPage = () => {
           </p>
         </div>
 
-        {/* Search and Filter */}
+        {/* Search, Filter, and Community Post Button */}
         <div className="max-w-3xl mx-auto mb-12">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-grow relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -147,6 +221,13 @@ const ResourcesPage = () => {
                 </SelectContent>
               </Select>
             </div>
+            <Button 
+              onClick={() => setShowCommunityDialog(true)}
+              className="w-full md:w-auto flex items-center gap-2 bg-akili-purple hover:bg-akili-purple/90"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Share with Community
+            </Button>
           </div>
         </div>
 
@@ -162,6 +243,7 @@ const ResourcesPage = () => {
                 timeToRead={resource.timeToRead}
                 image={resource.image}
                 link={resource.link}
+                rating={resource.rating}
               />
             ))
           ) : (
@@ -195,6 +277,52 @@ const ResourcesPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Community Post Dialog */}
+      <Dialog open={showCommunityDialog} onOpenChange={setShowCommunityDialog}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Share with the Community</DialogTitle>
+            <DialogDescription>
+              Share your thoughts, experiences, or questions with our mental health community.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="post-title" className="text-sm font-medium">
+                Title
+              </label>
+              <Input 
+                id="post-title"
+                value={communityPost.title}
+                onChange={(e) => setCommunityPost({...communityPost, title: e.target.value})}
+                placeholder="Enter a title for your post..."
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="post-content" className="text-sm font-medium">
+                Content
+              </label>
+              <Textarea
+                id="post-content"
+                value={communityPost.content}
+                onChange={(e) => setCommunityPost({...communityPost, content: e.target.value})}
+                placeholder="Share your thoughts, questions, or experiences..."
+                className="min-h-[150px]"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCommunityDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCommunityPost}>Post to Community</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import MoodTracker from "@/components/MoodTracker";
 import MoodJournal from "@/components/MoodJournal";
 import MoodPatternAnalysis from "@/components/MoodPatternAnalysis";
-import { Calendar, Shield, BarChart2 } from "lucide-react";
+import { Calendar, Shield, BarChart2, MessageSquare } from "lucide-react";
 import AdminMaker from "@/components/AdminMaker";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const MentalHealthDashboard = () => {
   return (
@@ -53,6 +55,37 @@ const MentalHealthDashboard = () => {
           </div>
 
           <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MessageSquare className="mr-2 h-5 w-5 text-akili-purple" />
+                  Community
+                </CardTitle>
+                <CardDescription>
+                  Connect with others and share experiences
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-sm text-muted-foreground">
+                  Join our supportive community to share your journey, ask questions, and support others.
+                </p>
+                <div className="flex flex-col space-y-2">
+                  <Button asChild>
+                    <Link to="/community" className="w-full">
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Visit Community
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link to="/resources" className="w-full">
+                      <BarChart2 className="mr-2 h-4 w-4" />
+                      Browse Resources
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
