@@ -29,7 +29,17 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
-import { Flag, Loader2, AlertTriangle, Check, X } from "lucide-react";
+import { 
+  Flag, 
+  Loader2, 
+  AlertTriangle, 
+  Check, 
+  X, 
+  RefreshCw, 
+  Search,
+  Filter 
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface ContentFlag {
   id: string;
@@ -55,10 +65,33 @@ const ContentModeration = () => {
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [resolutionStatus, setResolutionStatus] = useState("resolved");
   const [submitting, setSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [contentTypeFilter, setContentTypeFilter] = useState<string>("all");
+  const [displayFlags, setDisplayFlags] = useState<ContentFlag[]>([]);
 
   useEffect(() => {
     fetchFlags();
   }, [statusFilter]);
+
+  useEffect(() => {
+    // Filter flags based on search query and content type
+    let filtered = [...flags];
+    
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(flag => 
+        (flag.content_title && flag.content_title.toLowerCase().includes(query)) || 
+        (flag.reason && flag.reason.toLowerCase().includes(query)) ||
+        (flag.reporter_email && flag.reporter_email.toLowerCase().includes(query))
+      );
+    }
+    
+    if (contentTypeFilter !== "all") {
+      filtered = filtered.filter(flag => flag.content_type === contentTypeFilter);
+    }
+    
+    setDisplayFlags(filtered);
+  }, [flags, searchQuery, contentTypeFilter]);
 
   const fetchFlags = async () => {
     setLoading(true);
@@ -81,8 +114,16 @@ const ContentModeration = () => {
           // Get reporter information
           let reporterEmail = "Anonymous";
           if (flag.reporter_id) {
-            const { data: userData } = await supabase.auth.admin.getUserById(flag.reporter_id);
-            reporterEmail = userData?.user?.email || "Unknown";
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('first_name, last_name')
+              .eq('id', flag.reporter_id)
+              .single();
+              
+            if (profileData) {
+              const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
+              reporterEmail = fullName || "Anonymous User";
+            }
           }
           
           // Get content information based on content_type
@@ -98,7 +139,7 @@ const ContentModeration = () => {
               
             if (discussionData) {
               contentTitle = discussionData.title;
-              contentPreview = discussionData.content.substring(0, 100) + '...';
+              contentPreview = discussionData.content.substring(0, 100) + (discussionData.content.length > 100 ? '...' : '');
             }
           } else if (flag.content_type === 'journal') {
             const { data: journalData } = await supabase
@@ -109,7 +150,7 @@ const ContentModeration = () => {
               
             if (journalData) {
               contentTitle = "Journal Entry";
-              contentPreview = journalData.content.substring(0, 100) + '...';
+              contentPreview = journalData.content.substring(0, 100) + (journalData.content.length > 100 ? '...' : '');
             }
           }
           
@@ -123,6 +164,12 @@ const ContentModeration = () => {
       );
       
       setFlags(enhancedFlags);
+      setDisplayFlags(enhancedFlags);
+      
+      toast({
+        title: "Reports loaded",
+        description: `${enhancedFlags.length} reports found`,
+      });
     } catch (error) {
       console.error("Error fetching flags:", error);
       toast({
@@ -164,7 +211,7 @@ const ContentModeration = () => {
       
       toast({
         title: "Report resolved",
-        description: "The content flag has been resolved",
+        description: `The report has been marked as ${resolutionStatus.replace('_', ' ')}`,
       });
       
       // Refresh data and close dialog
@@ -182,6 +229,17 @@ const ContentModeration = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getContentTypeOptions = () => {
+    const types = Array.from(new Set(flags.map(flag => flag.content_type)));
+    return [
+      { value: "all", label: "All Types" },
+      ...types.map(type => ({ 
+        value: type, 
+        label: type.charAt(0).toUpperCase() + type.slice(1) 
+      }))
+    ];
   };
 
   const getStatusBadge = (status: string) => {
@@ -209,33 +267,65 @@ const ContentModeration = () => {
         Review and address reported content across the platform
       </p>
 
-      <div className="flex justify-between items-center">
-        <Select
-          value={statusFilter}
-          onValueChange={setStatusFilter}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Reports</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
-            <SelectItem value="content_removed">Content Removed</SelectItem>
-            <SelectItem value="dismissed">Dismissed</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Reports</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+              <SelectItem value="content_removed">Content Removed</SelectItem>
+              <SelectItem value="dismissed">Dismissed</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={contentTypeFilter}
+            onValueChange={setContentTypeFilter}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Content type" />
+            </SelectTrigger>
+            <SelectContent>
+              {getContentTypeOptions().map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search reports..."
+              className="pl-10 w-full md:w-[220px]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
 
         <Button
-          variant="outline"
           onClick={fetchFlags}
           disabled={loading}
+          className="whitespace-nowrap"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+          {loading ? 
+            <Loader2 className="h-4 w-4 animate-spin mr-2" /> : 
+            <RefreshCw className="h-4 w-4 mr-2" />
+          }
+          {loading ? "Loading..." : "Refresh"}
         </Button>
       </div>
 
-      <div className="border rounded-md">
+      <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -253,19 +343,33 @@ const ContentModeration = () => {
                   <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : flags.length === 0 ? (
+            ) : displayFlags.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  No flags found
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-muted-foreground">No reports found matching your criteria</p>
+                    {(searchQuery || contentTypeFilter !== "all") && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setContentTypeFilter("all");
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
-              flags.map((flag) => (
+              displayFlags.map((flag) => (
                 <TableRow key={flag.id}>
                   <TableCell>
                     <div>
                       <div className="font-medium">{flag.content_type.charAt(0).toUpperCase() + flag.content_type.slice(1)}</div>
-                      <div className="text-sm text-muted-foreground">{flag.content_title}</div>
+                      <div className="text-sm text-muted-foreground line-clamp-1">{flag.content_title}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -285,7 +389,6 @@ const ContentModeration = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentFlag(flag)}
-                      disabled={flag.status !== 'pending'}
                     >
                       {flag.status === 'pending' ? 'Review' : 'View Details'}
                     </Button>
@@ -301,7 +404,10 @@ const ContentModeration = () => {
       <Dialog open={!!currentFlag} onOpenChange={(open) => !open && setCurrentFlag(null)}>
         <DialogContent className="max-w-md md:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Review Reported Content</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5" />
+              Review Reported Content
+            </DialogTitle>
             <DialogDescription>
               Review the reported content and take appropriate action
             </DialogDescription>

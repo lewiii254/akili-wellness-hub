@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import MoodTracker from "@/components/MoodTracker";
 import MoodJournal from "@/components/MoodJournal";
 import MoodPatternAnalysis from "@/components/MoodPatternAnalysis";
-import { Calendar, Shield, BarChart2, MessageSquare } from "lucide-react";
+import { Calendar, Shield, BarChart2, MessageSquare, Flag } from "lucide-react";
 import AdminMaker from "@/components/AdminMaker";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -101,6 +101,29 @@ const MentalHealthDashboard = () => {
                   Use this tool to grant admin privileges to an email address (default: ngondimarklewis@gmail.com).
                 </p>
                 <AdminMaker />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Flag className="mr-2 h-5 w-5 text-akili-purple" />
+                  Content Moderation
+                </CardTitle>
+                <CardDescription>
+                  Review and moderate reported content
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-sm text-muted-foreground">
+                  Access the admin dashboard to review and moderate user-reported content.
+                </p>
+                <Button asChild variant="outline">
+                  <Link to="/admin/content" className="w-full">
+                    <Flag className="mr-2 h-4 w-4" />
+                    Moderate Content
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </div>
