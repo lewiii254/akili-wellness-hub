@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -46,86 +47,216 @@ import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
-const discussions = [
-  {
-    id: 1,
-    title: "Dealing with daily anxiety",
-    author: "Sarah J.",
-    date: "3 days ago",
-    replies: 12,
-    likes: 24,
-    tags: ["Anxiety", "Self-care"],
-    authorAvatar: "https://i.pravatar.cc/150?img=1",
-  },
-  {
-    id: 2,
-    title: "Mindfulness practice techniques",
-    author: "Michael T.",
-    date: "1 week ago",
-    replies: 28,
-    likes: 56,
-    tags: ["Mindfulness", "Meditation"],
-    authorAvatar: "https://i.pravatar.cc/150?img=2",
-  },
-  {
-    id: 3,
-    title: "Sleep improvement strategies",
-    author: "Elena D.",
-    date: "2 days ago",
-    replies: 17,
-    likes: 31,
-    tags: ["Sleep", "Wellness"],
-    authorAvatar: "https://i.pravatar.cc/150?img=3",
-  },
-];
+interface Discussion {
+  id: string | number;
+  title: string;
+  author: string;
+  date: string;
+  replies: number;
+  likes: number;
+  tags: string[];
+  authorAvatar: string;
+  content?: string; // Added content field
+}
 
-const events = [
-  {
-    id: 1,
-    title: "Group Meditation Session",
-    date: "May 1, 2025",
-    time: "6:00 PM - 7:00 PM",
-    attendees: 12,
-    host: "Dr. Lisa Chen",
-    type: "Virtual",
-  },
-  {
-    id: 2,
-    title: "Stress Management Workshop",
-    date: "May 5, 2025",
-    time: "4:00 PM - 5:30 PM",
-    attendees: 24,
-    host: "Mark Wilson, LCSW",
-    type: "In-person",
-  },
-];
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  attendees: number;
+  host: string;
+  type: string;
+}
 
-const supportGroups = [
-  {
-    id: 1,
-    name: "Anxiety Support Circle",
-    members: 145,
-    description: "A supportive community for sharing anxiety experiences and coping strategies.",
-    topics: ["General Anxiety", "Social Anxiety", "Panic Attacks"],
-  },
-  {
-    id: 2,
-    name: "Mindfulness Practitioners",
-    members: 92,
-    description: "For those practicing mindfulness and meditation in daily life.",
-    topics: ["Meditation", "Present Awareness", "Mindful Living"],
-  },
-];
+interface SupportGroup {
+  id: number;
+  name: string;
+  members: number;
+  description: string;
+  topics: string[];
+}
 
 const CommunityPage = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [postTitle, setPostTitle] = useState("");
   const [postContent, setPostContent] = useState("");
+  const [postTags, setPostTags] = useState("");
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [currentDiscussionId, setCurrentDiscussionId] = useState<number | null>(null);
+  const [currentDiscussionId, setCurrentDiscussionId] = useState<number | string | null>(null);
   const [reportReason, setReportReason] = useState("");
   const [submittingReport, setSubmittingReport] = useState(false);
+  const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [isLoadingDiscussions, setIsLoadingDiscussions] = useState(true);
   const { user } = useAuth();
+
+  const defaultDiscussions = [
+    {
+      id: "sample-1",
+      title: "Dealing with daily anxiety",
+      author: "Sarah J.",
+      date: "3 days ago",
+      replies: 12,
+      likes: 24,
+      tags: ["Anxiety", "Self-care"],
+      authorAvatar: "https://i.pravatar.cc/150?img=1",
+    },
+    {
+      id: "sample-2",
+      title: "Mindfulness practice techniques",
+      author: "Michael T.",
+      date: "1 week ago",
+      replies: 28,
+      likes: 56,
+      tags: ["Mindfulness", "Meditation"],
+      authorAvatar: "https://i.pravatar.cc/150?img=2",
+    },
+    {
+      id: "sample-3",
+      title: "Sleep improvement strategies",
+      author: "Elena D.",
+      date: "2 days ago",
+      replies: 17,
+      likes: 31,
+      tags: ["Sleep", "Wellness"],
+      authorAvatar: "https://i.pravatar.cc/150?img=3",
+    },
+  ];
+
+  const events = [
+    {
+      id: 1,
+      title: "Group Meditation Session",
+      date: "May 1, 2025",
+      time: "6:00 PM - 7:00 PM",
+      attendees: 12,
+      host: "Dr. Lisa Chen",
+      type: "Virtual",
+    },
+    {
+      id: 2,
+      title: "Stress Management Workshop",
+      date: "May 5, 2025",
+      time: "4:00 PM - 5:30 PM",
+      attendees: 24,
+      host: "Mark Wilson, LCSW",
+      type: "In-person",
+    },
+  ];
+
+  const supportGroups = [
+    {
+      id: 1,
+      name: "Anxiety Support Circle",
+      members: 145,
+      description: "A supportive community for sharing anxiety experiences and coping strategies.",
+      topics: ["General Anxiety", "Social Anxiety", "Panic Attacks"],
+    },
+    {
+      id: 2,
+      name: "Mindfulness Practitioners",
+      members: 92,
+      description: "For those practicing mindfulness and meditation in daily life.",
+      topics: ["Meditation", "Present Awareness", "Mindful Living"],
+    },
+  ];
+
+  // Fetch discussions when component mounts
+  useEffect(() => {
+    fetchDiscussions();
+  }, []);
+
+  const fetchDiscussions = async () => {
+    setIsLoadingDiscussions(true);
+    try {
+      // First, check if community_discussions table exists
+      const { data: tableExists, error: tableCheckError } = await supabase
+        .from('community_discussions')
+        .select('id')
+        .limit(1);
+      
+      if (tableCheckError) {
+        console.error("Error checking discussions table:", tableCheckError);
+        // If the table doesn't exist, just show sample data
+        setDiscussions(defaultDiscussions);
+        return;
+      }
+
+      // Fetch real discussions from the database
+      const { data, error } = await supabase
+        .from('community_discussions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        // Transform the data to match our Discussion interface
+        const formattedDiscussions: Discussion[] = data.map(item => {
+          // Parse tags if they're stored as a string
+          let tags: string[] = [];
+          try {
+            if (typeof item.tags === 'string') {
+              tags = JSON.parse(item.tags);
+            } else if (Array.isArray(item.tags)) {
+              tags = item.tags;
+            }
+          } catch (e) {
+            console.error("Failed to parse tags", e);
+            tags = item.tags ? [item.tags] : [];
+          }
+
+          // Format the date
+          const date = new Date(item.created_at);
+          const now = new Date();
+          const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+          let dateString = "";
+          
+          if (diffInDays === 0) {
+            dateString = "Today";
+          } else if (diffInDays === 1) {
+            dateString = "Yesterday";
+          } else if (diffInDays < 7) {
+            dateString = `${diffInDays} days ago`;
+          } else {
+            dateString = date.toLocaleDateString();
+          }
+
+          return {
+            id: item.id,
+            title: item.title,
+            content: item.content,
+            author: item.author_name || "Anonymous User",
+            date: dateString,
+            replies: item.reply_count || 0,
+            likes: item.like_count || 0,
+            tags: tags,
+            authorAvatar: item.author_avatar || `https://i.pravatar.cc/150?u=${item.id}`,
+          };
+        });
+
+        // Combine real discussions with sample ones if needed
+        setDiscussions(formattedDiscussions.length > 0 ? formattedDiscussions : defaultDiscussions);
+      } else {
+        // Use default discussions if no data in the database
+        setDiscussions(defaultDiscussions);
+      }
+    } catch (error) {
+      console.error("Error fetching discussions:", error);
+      // Fallback to default discussions on error
+      setDiscussions(defaultDiscussions);
+      toast({
+        title: "Error loading discussions",
+        description: "We encountered an issue loading the community discussions. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDiscussions(false);
+    }
+  };
   
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +282,25 @@ const CommunityPage = () => {
     }, 1500);
   };
   
-  const handleNewPost = () => {
+  const handleNewPost = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to post in the community.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!postTitle.trim()) {
+      toast({
+        title: "Post title required",
+        description: "Please provide a title for your post.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!postContent.trim()) {
       toast({
         title: "Post content required",
@@ -161,11 +310,75 @@ const CommunityPage = () => {
       return;
     }
     
-    toast({
-      title: "Post submitted",
-      description: "Your post will be reviewed by moderators.",
-    });
-    setPostContent("");
+    setIsSubmitting(true);
+    
+    try {
+      // Parse tags from the input (comma separated)
+      const tags = postTags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+      
+      // First, try to insert into community_discussions table
+      const { data: discussionData, error: discussionError } = await supabase
+        .from('community_discussions')
+        .insert({
+          title: postTitle,
+          content: postContent,
+          tags: tags,
+          author_id: user.id,
+          author_name: user.email?.split('@')[0] || "User",
+          is_approved: false // Posts start as unapproved
+        })
+        .select('id')
+        .single();
+      
+      if (discussionError) {
+        console.error("Error creating discussion post:", discussionError);
+        throw discussionError;
+      }
+
+      // Now create a content flag for moderation
+      if (discussionData && discussionData.id) {
+        const { error: flagError } = await supabase
+          .from('content_flags')
+          .insert({
+            content_type: 'discussion',
+            content_id: discussionData.id,
+            reporter_id: user.id, // In this case, the reporter is the system
+            reason: "New post pending approval",
+            status: "pending"
+          });
+
+        if (flagError) {
+          console.error("Error creating moderation flag:", flagError);
+          // We don't throw here since the post was created
+        }
+      }
+      
+      toast({
+        title: "Post submitted",
+        description: "Your post will be reviewed by moderators before appearing in the community.",
+      });
+      
+      // Clear the form
+      setPostTitle("");
+      setPostContent("");
+      setPostTags("");
+      
+      // Refresh the discussions list
+      fetchDiscussions();
+      
+    } catch (error) {
+      console.error("Error submitting post:", error);
+      toast({
+        title: "Error submitting post",
+        description: "We encountered an issue submitting your post. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const handleJoinGroup = (groupName: string) => {
@@ -182,7 +395,7 @@ const CommunityPage = () => {
     });
   };
 
-  const openReportDialog = (discussionId: number) => {
+  const openReportDialog = (discussionId: number | string) => {
     setCurrentDiscussionId(discussionId);
     setReportDialogOpen(true);
   };
@@ -206,6 +419,7 @@ const CommunityPage = () => {
           content_id: String(currentDiscussionId),
           reporter_id: user?.id,
           reason: reportReason,
+          status: "pending" // Ensure we set status to pending
         });
 
       if (error) throw error;
@@ -252,82 +466,118 @@ const CommunityPage = () => {
             <TabsContent value="discussions" className="space-y-6">
               <Card className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Start a Discussion</h3>
-                <Textarea 
-                  placeholder="What's on your mind?" 
-                  className="min-h-[100px] mb-4"
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                />
-                <div className="flex justify-end">
-                  <Button onClick={handleNewPost}>Post</Button>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="post-title" className="block text-sm font-medium mb-1">Title</label>
+                    <Input 
+                      id="post-title"
+                      placeholder="Title for your discussion" 
+                      value={postTitle}
+                      onChange={(e) => setPostTitle(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="post-content" className="block text-sm font-medium mb-1">Content</label>
+                    <Textarea 
+                      id="post-content"
+                      placeholder="What's on your mind?" 
+                      className="min-h-[100px]"
+                      value={postContent}
+                      onChange={(e) => setPostContent(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="post-tags" className="block text-sm font-medium mb-1">Tags (comma separated)</label>
+                    <Input 
+                      id="post-tags"
+                      placeholder="anxiety, wellness, mindfulness" 
+                      value={postTags}
+                      onChange={(e) => setPostTags(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-4">
+                  <Button onClick={handleNewPost} disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Post Discussion
+                  </Button>
                 </div>
               </Card>
               
               <h3 className="text-xl font-semibold mb-2">Recent Discussions</h3>
               
               <div className="space-y-4">
-                {discussions.map((discussion) => (
-                  <Sheet key={discussion.id}>
-                    <SheetTrigger asChild>
-                      <Card className="p-5 hover:shadow-md cursor-pointer transition-shadow">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-10 w-10">
-                            <img src={discussion.authorAvatar} alt={discussion.author} />
-                          </Avatar>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-lg mb-1">{discussion.title}</h4>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              {discussion.tags.map((tag) => (
-                                <Badge key={tag} variant="outline" className="bg-secondary/30">
-                                  {tag}
-                                </Badge>
-                              ))}
+                {isLoadingDiscussions ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : discussions.length > 0 ? (
+                  discussions.map((discussion) => (
+                    <Sheet key={discussion.id}>
+                      <SheetTrigger asChild>
+                        <Card className="p-5 hover:shadow-md cursor-pointer transition-shadow">
+                          <div className="flex items-start gap-3">
+                            <Avatar className="h-10 w-10">
+                              <img src={discussion.authorAvatar} alt={discussion.author} />
+                            </Avatar>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-lg mb-1">{discussion.title}</h4>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {discussion.tags.map((tag, index) => (
+                                  <Badge key={`${discussion.id}-tag-${index}`} variant="outline" className="bg-secondary/30">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <span className="mr-4">By {discussion.author}</span>
+                                <Clock className="h-3 w-3 mr-1" />
+                                <span className="mr-4">{discussion.date}</span>
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                                <span className="mr-4">{discussion.replies} replies</span>
+                                <ThumbsUp className="h-3 w-3 mr-1" />
+                                <span>{discussion.likes}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <span className="mr-4">By {discussion.author}</span>
-                              <Clock className="h-3 w-3 mr-1" />
-                              <span className="mr-4">{discussion.date}</span>
-                              <MessageSquare className="h-3 w-3 mr-1" />
-                              <span className="mr-4">{discussion.replies} replies</span>
-                              <ThumbsUp className="h-3 w-3 mr-1" />
-                              <span>{discussion.likes}</span>
+                          </div>
+                        </Card>
+                      </SheetTrigger>
+                      <SheetContent className="w-full sm:max-w-md">
+                        <SheetHeader>
+                          <SheetTitle>{discussion.title}</SheetTitle>
+                          <SheetDescription>
+                            Started by {discussion.author} · {discussion.date}
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="py-6">
+                          <p className="mb-6">
+                            {discussion.content || "This is a placeholder for the discussion content. In the full version, this would contain the actual post content and comments."}
+                          </p>
+                          <div className="space-y-4">
+                            <div className="border-t pt-4">
+                              <h4 className="font-medium mb-2">Comments</h4>
+                              <Textarea placeholder="Add your comment..." className="mb-2" />
+                              <div className="flex justify-between">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openReportDialog(discussion.id)}
+                                >
+                                  <Flag className="h-4 w-4 mr-2" /> Report
+                                </Button>
+                                <Button size="sm">Comment</Button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </Card>
-                    </SheetTrigger>
-                    <SheetContent className="w-full sm:max-w-md">
-                      <SheetHeader>
-                        <SheetTitle>{discussion.title}</SheetTitle>
-                        <SheetDescription>
-                          Started by {discussion.author} · {discussion.date}
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="py-6">
-                        <p className="mb-6">
-                          This is a placeholder for the discussion content. In the full version, 
-                          this would contain the actual post content and comments.
-                        </p>
-                        <div className="space-y-4">
-                          <div className="border-t pt-4">
-                            <h4 className="font-medium mb-2">Comments</h4>
-                            <Textarea placeholder="Add your comment..." className="mb-2" />
-                            <div className="flex justify-between">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => openReportDialog(discussion.id)}
-                              >
-                                <Flag className="h-4 w-4 mr-2" /> Report
-                              </Button>
-                              <Button size="sm">Comment</Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                ))}
+                      </SheetContent>
+                    </Sheet>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No discussions yet. Be the first to start a conversation!</p>
+                  </div>
+                )}
               </div>
             </TabsContent>
             

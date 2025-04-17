@@ -101,12 +101,18 @@ const ContentModeration = () => {
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching flags:", error);
+        throw error;
+      }
       
       // Filter by status if needed
       const filteredFlags = statusFilter === "all" 
-        ? data 
-        : data.filter(flag => flag.status === statusFilter);
+        ? data || [] 
+        : (data || []).filter(flag => flag.status === statusFilter);
+
+      // Debug logging
+      console.log("Fetched flags:", filteredFlags);
 
       // Enhance the flags with additional data
       const enhancedFlags = await Promise.all(
@@ -116,13 +122,13 @@ const ContentModeration = () => {
           if (flag.reporter_id) {
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('first_name, last_name')
+              .select('first_name, last_name, email')
               .eq('id', flag.reporter_id)
               .single();
               
             if (profileData) {
               const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
-              reporterEmail = fullName || "Anonymous User";
+              reporterEmail = fullName || profileData.email || "Anonymous User";
             }
           }
           
@@ -130,7 +136,7 @@ const ContentModeration = () => {
           let contentTitle = "Unknown Content";
           let contentPreview = "";
           
-          if (flag.content_type === 'discussion') {
+          if (flag.content_type === 'discussion' || flag.content_type === 'post') {
             const { data: discussionData } = await supabase
               .from('community_discussions')
               .select('title, content')
@@ -139,7 +145,7 @@ const ContentModeration = () => {
               
             if (discussionData) {
               contentTitle = discussionData.title;
-              contentPreview = discussionData.content.substring(0, 100) + (discussionData.content.length > 100 ? '...' : '');
+              contentPreview = discussionData.content?.substring(0, 100) + (discussionData.content?.length > 100 ? '...' : '');
             }
           } else if (flag.content_type === 'journal') {
             const { data: journalData } = await supabase
@@ -163,6 +169,7 @@ const ContentModeration = () => {
         })
       );
       
+      console.log("Enhanced flags:", enhancedFlags);
       setFlags(enhancedFlags);
       setDisplayFlags(enhancedFlags);
       
@@ -200,13 +207,22 @@ const ContentModeration = () => {
       if (flagError) throw flagError;
       
       // If content is to be removed/hidden
-      if (resolutionStatus === 'content_removed' && currentFlag.content_type === 'discussion') {
-        const { error: contentError } = await supabase
-          .from('community_discussions')
-          .update({ is_hidden: true })
-          .eq('id', currentFlag.content_id);
-          
-        if (contentError) throw contentError;
+      if (resolutionStatus === 'content_removed') {
+        if (currentFlag.content_type === 'discussion' || currentFlag.content_type === 'post') {
+          const { error: contentError } = await supabase
+            .from('community_discussions')
+            .update({ is_hidden: true })
+            .eq('id', currentFlag.content_id);
+            
+          if (contentError) throw contentError;
+        } else if (currentFlag.content_type === 'journal') {
+          const { error: journalError } = await supabase
+            .from('mood_journal_entries')
+            .update({ is_hidden: true })
+            .eq('id', currentFlag.content_id);
+            
+          if (journalError) throw journalError;
+        }
       }
       
       toast({

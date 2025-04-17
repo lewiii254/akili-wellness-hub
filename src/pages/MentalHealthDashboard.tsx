@@ -4,12 +4,72 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import MoodTracker from "@/components/MoodTracker";
 import MoodJournal from "@/components/MoodJournal";
 import MoodPatternAnalysis from "@/components/MoodPatternAnalysis";
-import { Calendar, Shield, BarChart2, MessageSquare, Flag } from "lucide-react";
+import { Calendar, Shield, BarChart2, MessageSquare, Flag, Bell, AlertTriangle } from "lucide-react";
 import AdminMaker from "@/components/AdminMaker";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
 
 const MentalHealthDashboard = () => {
+  const { user } = useAuth();
+  const [pendingReportsCount, setPendingReportsCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is an admin
+  useEffect(() => {
+    if (user?.id) {
+      const checkAdminStatus = async () => {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin');
+          
+        setIsAdmin(Array.isArray(data) && data.length > 0);
+      };
+      
+      checkAdminStatus();
+    }
+  }, [user]);
+
+  // Get pending reports count for admin
+  useEffect(() => {
+    if (user?.id && isAdmin) {
+      const fetchPendingReports = async () => {
+        const { data, error, count } = await supabase
+          .from('content_flags')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+          
+        if (!error && count !== null) {
+          setPendingReportsCount(count);
+        }
+      };
+      
+      fetchPendingReports();
+      
+      // Set up subscription to content_flags table
+      const subscription = supabase
+        .channel('content_flags_changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'content_flags' },
+          () => {
+            // Refresh count on any changes
+            fetchPendingReports();
+          }
+        )
+        .subscribe();
+        
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [user, isAdmin]);
+
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 gradient-bg">
       <div className="max-w-7xl mx-auto">
@@ -109,6 +169,11 @@ const MentalHealthDashboard = () => {
                 <CardTitle className="flex items-center">
                   <Flag className="mr-2 h-5 w-5 text-akili-purple" />
                   Content Moderation
+                  {isAdmin && pendingReportsCount > 0 && (
+                    <Badge className="ml-2 bg-red-500" variant="destructive">
+                      {pendingReportsCount}
+                    </Badge>
+                  )}
                 </CardTitle>
                 <CardDescription>
                   Review and moderate reported content
@@ -116,12 +181,32 @@ const MentalHealthDashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-sm text-muted-foreground">
-                  Access the admin dashboard to review and moderate user-reported content.
+                  {isAdmin && pendingReportsCount > 0 ? (
+                    <>
+                      <AlertTriangle className="inline-block mr-2 h-4 w-4 text-yellow-500" />
+                      There {pendingReportsCount === 1 ? 'is' : 'are'} <strong>{pendingReportsCount}</strong> pending {pendingReportsCount === 1 ? 'report' : 'reports'} that need your attention.
+                    </>
+                  ) : (
+                    "Access the admin dashboard to review and moderate user-reported content."
+                  )}
                 </p>
-                <Button asChild variant="outline">
+                <Button 
+                  asChild 
+                  variant={isAdmin && pendingReportsCount > 0 ? "default" : "outline"}
+                  className={isAdmin && pendingReportsCount > 0 ? "bg-red-500 hover:bg-red-600" : ""}
+                >
                   <Link to="/admin/content" className="w-full">
-                    <Flag className="mr-2 h-4 w-4" />
-                    Moderate Content
+                    {isAdmin && pendingReportsCount > 0 ? (
+                      <>
+                        <Bell className="mr-2 h-4 w-4" />
+                        Review {pendingReportsCount} Pending {pendingReportsCount === 1 ? 'Report' : 'Reports'}
+                      </>
+                    ) : (
+                      <>
+                        <Flag className="mr-2 h-4 w-4" />
+                        Moderate Content
+                      </>
+                    )}
                   </Link>
                 </Button>
               </CardContent>
