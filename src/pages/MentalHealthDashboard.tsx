@@ -3,9 +3,9 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import MoodTracker from "@/components/MoodTracker";
 import MoodJournal from "@/components/MoodJournal";
-import { Calendar } from "lucide-react";
+import MoodPatternAnalysis from "@/components/MoodPatternAnalysis";
+import { Calendar, Shield, BarChart2 } from "lucide-react";
 import AdminMaker from "@/components/AdminMaker";
-import { Shield } from "lucide-react";
 
 const MentalHealthDashboard = () => {
   return (
@@ -33,7 +33,18 @@ const MentalHealthDashboard = () => {
 
             <Card>
               <CardHeader>
+                <CardTitle>Mood Pattern Analysis</CardTitle>
+                <CardDescription>AI-powered insights into your emotional patterns</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MoodPatternAnalysis />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle>Mood Journal 📝</CardTitle>
+                <CardDescription>Document your thoughts and feelings</CardDescription>
               </CardHeader>
               <CardContent>
                 <MoodJournal />
