@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,13 +49,22 @@ import { supabase } from "@/integrations/supabase/client";
 interface Discussion {
   id: string | number;
   title: string;
-  author: string;
-  date: string;
-  replies: number;
-  likes: number;
-  tags: string[];
-  authorAvatar: string;
-  content?: string; // Added content field
+  content?: string;
+  author_id?: string;
+  author_name?: string;
+  author_avatar?: string;
+  created_at?: string;
+  updated_at?: string;
+  is_approved?: boolean;
+  is_hidden?: boolean;
+  tags?: string[];
+  reply_count?: number;
+  like_count?: number;
+  author?: string;
+  date?: string;
+  replies?: number;
+  likes?: number;
+  authorAvatar?: string;
 }
 
 interface Event {
@@ -162,7 +170,6 @@ const CommunityPage = () => {
     },
   ];
 
-  // Fetch discussions when component mounts
   useEffect(() => {
     fetchDiscussions();
   }, []);
@@ -170,7 +177,6 @@ const CommunityPage = () => {
   const fetchDiscussions = async () => {
     setIsLoadingDiscussions(true);
     try {
-      // First, check if community_discussions table exists
       const { data: tableExists, error: tableCheckError } = await supabase
         .from('community_discussions')
         .select('id')
@@ -178,12 +184,10 @@ const CommunityPage = () => {
       
       if (tableCheckError) {
         console.error("Error checking discussions table:", tableCheckError);
-        // If the table doesn't exist, just show sample data
         setDiscussions(defaultDiscussions);
         return;
       }
 
-      // Fetch real discussions from the database
       const { data, error } = await supabase
         .from('community_discussions')
         .select('*')
@@ -194,9 +198,7 @@ const CommunityPage = () => {
       }
 
       if (data && data.length > 0) {
-        // Transform the data to match our Discussion interface
         const formattedDiscussions: Discussion[] = data.map(item => {
-          // Parse tags if they're stored as a string
           let tags: string[] = [];
           try {
             if (typeof item.tags === 'string') {
@@ -206,10 +208,9 @@ const CommunityPage = () => {
             }
           } catch (e) {
             console.error("Failed to parse tags", e);
-            tags = item.tags ? [item.tags] : [];
+            tags = [];
           }
 
-          // Format the date
           const date = new Date(item.created_at);
           const now = new Date();
           const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -233,20 +234,26 @@ const CommunityPage = () => {
             date: dateString,
             replies: item.reply_count || 0,
             likes: item.like_count || 0,
-            tags: tags,
+            tags: item.tags || [],
             authorAvatar: item.author_avatar || `https://i.pravatar.cc/150?u=${item.id}`,
+            author_id: item.author_id,
+            author_name: item.author_name,
+            author_avatar: item.author_avatar,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            is_approved: item.is_approved,
+            is_hidden: item.is_hidden,
+            reply_count: item.reply_count,
+            like_count: item.like_count
           };
         });
 
-        // Combine real discussions with sample ones if needed
         setDiscussions(formattedDiscussions.length > 0 ? formattedDiscussions : defaultDiscussions);
       } else {
-        // Use default discussions if no data in the database
         setDiscussions(defaultDiscussions);
       }
     } catch (error) {
       console.error("Error fetching discussions:", error);
-      // Fallback to default discussions on error
       setDiscussions(defaultDiscussions);
       toast({
         title: "Error loading discussions",
@@ -257,7 +264,7 @@ const CommunityPage = () => {
       setIsLoadingDiscussions(false);
     }
   };
-  
+
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
@@ -271,7 +278,6 @@ const CommunityPage = () => {
     
     setIsSubmitting(true);
     
-    // Simulate API call
     setTimeout(() => {
       toast({
         title: "Thank you for signing up!",
@@ -281,7 +287,7 @@ const CommunityPage = () => {
       setIsSubmitting(false);
     }, 1500);
   };
-  
+
   const handleNewPost = async () => {
     if (!user) {
       toast({
@@ -313,13 +319,11 @@ const CommunityPage = () => {
     setIsSubmitting(true);
     
     try {
-      // Parse tags from the input (comma separated)
       const tags = postTags
         .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
       
-      // First, try to insert into community_discussions table
       const { data: discussionData, error: discussionError } = await supabase
         .from('community_discussions')
         .insert({
@@ -328,7 +332,7 @@ const CommunityPage = () => {
           tags: tags,
           author_id: user.id,
           author_name: user.email?.split('@')[0] || "User",
-          is_approved: false // Posts start as unapproved
+          is_approved: false
         })
         .select('id')
         .single();
@@ -338,21 +342,19 @@ const CommunityPage = () => {
         throw discussionError;
       }
 
-      // Now create a content flag for moderation
       if (discussionData && discussionData.id) {
         const { error: flagError } = await supabase
           .from('content_flags')
           .insert({
             content_type: 'discussion',
             content_id: discussionData.id,
-            reporter_id: user.id, // In this case, the reporter is the system
+            reporter_id: user.id,
             reason: "New post pending approval",
             status: "pending"
           });
 
         if (flagError) {
           console.error("Error creating moderation flag:", flagError);
-          // We don't throw here since the post was created
         }
       }
       
@@ -361,14 +363,11 @@ const CommunityPage = () => {
         description: "Your post will be reviewed by moderators before appearing in the community.",
       });
       
-      // Clear the form
       setPostTitle("");
       setPostContent("");
       setPostTags("");
       
-      // Refresh the discussions list
       fetchDiscussions();
-      
     } catch (error) {
       console.error("Error submitting post:", error);
       toast({
@@ -380,14 +379,14 @@ const CommunityPage = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleJoinGroup = (groupName: string) => {
     toast({
       title: `Joined ${groupName}`,
       description: "You've successfully joined the group.",
     });
   };
-  
+
   const handleRegisterForEvent = (eventTitle: string) => {
     toast({
       title: "Registration successful",
@@ -419,7 +418,7 @@ const CommunityPage = () => {
           content_id: String(currentDiscussionId),
           reporter_id: user?.id,
           reason: reportReason,
-          status: "pending" // Ensure we set status to pending
+          status: "pending"
         });
 
       if (error) throw error;
@@ -446,7 +445,6 @@ const CommunityPage = () => {
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8 gradient-bg">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">AkiliSpa Community</h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -462,7 +460,6 @@ const CommunityPage = () => {
               <TabsTrigger value="events">Events</TabsTrigger>
             </TabsList>
             
-            {/* Discussions Tab Content */}
             <TabsContent value="discussions" className="space-y-6">
               <Card className="p-6">
                 <h3 className="text-xl font-semibold mb-4">Start a Discussion</h3>
@@ -581,7 +578,6 @@ const CommunityPage = () => {
               </div>
             </TabsContent>
             
-            {/* Support Groups Tab Content */}
             <TabsContent value="groups" className="space-y-6">
               <h3 className="text-xl font-semibold mb-4">Support Groups</h3>
               
@@ -651,7 +647,6 @@ const CommunityPage = () => {
               </Drawer>
             </TabsContent>
             
-            {/* Events Tab Content */}
             <TabsContent value="events" className="space-y-6">
               <h3 className="text-xl font-semibold mb-4">Upcoming Events</h3>
               
@@ -722,7 +717,6 @@ const CommunityPage = () => {
           </Card>
         )}
 
-        {/* Community Guidelines Preview */}
         <div className="mt-20 bg-secondary/70 p-8 rounded-2xl">
           <div className="flex items-start gap-6">
             <div className="hidden md:flex mt-2">
@@ -766,7 +760,6 @@ const CommunityPage = () => {
           </div>
         </div>
 
-        {/* Call to Action - for non-signed in users */}
         {!user && (
           <div className="mt-12 text-center">
             <Button size="lg" className="rounded-full px-8" onClick={() => {
@@ -779,7 +772,6 @@ const CommunityPage = () => {
         )}
       </div>
 
-      {/* Report Content Dialog */}
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

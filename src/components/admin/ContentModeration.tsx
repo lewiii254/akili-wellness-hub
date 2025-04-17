@@ -120,15 +120,23 @@ const ContentModeration = () => {
           // Get reporter information
           let reporterEmail = "Anonymous";
           if (flag.reporter_id) {
-            const { data: profileData } = await supabase
+            // Modified: Check if profiles table has the necessary fields
+            const { data: profileData, error: profileError } = await supabase
               .from('profiles')
-              .select('first_name, last_name, email')
+              .select('*')
               .eq('id', flag.reporter_id)
               .single();
               
-            if (profileData) {
-              const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
-              reporterEmail = fullName || profileData.email || "Anonymous User";
+            if (profileError) {
+              console.error("Error fetching profile:", profileError);
+            } else if (profileData) {
+              // Safely access the fields
+              const firstName = profileData.first_name || '';
+              const lastName = profileData.last_name || '';
+              const email = profileData.email || '';
+              
+              const fullName = `${firstName} ${lastName}`.trim();
+              reporterEmail = fullName || email || "Anonymous User";
             }
           }
           
@@ -216,9 +224,12 @@ const ContentModeration = () => {
             
           if (contentError) throw contentError;
         } else if (currentFlag.content_type === 'journal') {
+          // Updated to match the mood_journal_entries schema
           const { error: journalError } = await supabase
             .from('mood_journal_entries')
-            .update({ is_hidden: true })
+            .update({
+              is_hidden: true
+            })
             .eq('id', currentFlag.content_id);
             
           if (journalError) throw journalError;
