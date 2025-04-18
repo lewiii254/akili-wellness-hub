@@ -1,7 +1,5 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import StatsSection from "@/components/home/StatsSection";
@@ -12,16 +10,7 @@ import CTASection from "@/components/home/CTASection";
 
 const HomePage = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <Button asChild className="animate-bounce">
-            <Link to="/mental-health">
-              📊 Check Your Mental Health Dashboard
-            </Link>
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background/50 to-secondary/20">
       <HeroSection />
       <FeaturesSection />
       <StatsSection />
