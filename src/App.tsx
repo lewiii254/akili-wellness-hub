@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,7 @@ import UserManagementPage from "./pages/admin/UserManagementPage";
 import ContentModerationPage from "./pages/admin/ContentModerationPage";
 import CommunityManagementPage from "./pages/admin/CommunityManagementPage";
 import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
+import MeditationPage from "./pages/MeditationPage";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +96,7 @@ const App = () => (
                   } 
                 />
                 
+                <Route path="/meditation" element={<MeditationPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
