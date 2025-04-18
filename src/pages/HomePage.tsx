@@ -10,7 +10,7 @@ import CTASection from "@/components/home/CTASection";
 
 const HomePage = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background via-background/50 to-secondary/20">
+    <div className="flex flex-col min-h-screen bg-background">
       <HeroSection />
       <FeaturesSection />
       <StatsSection />
