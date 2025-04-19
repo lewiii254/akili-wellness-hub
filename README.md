@@ -1,28 +1,67 @@
-# Welcome to your Lovable project
+# 🌺 AkiliSpa – Mental Health Wellness Platform
 
-## Project info
+**AkiliSpa** is a holistic mental health platform with **AI-powered support** and **community-driven care**. Built with love and modern web tech, AkiliSpa is your safe, serene digital space to reflect, connect, and thrive 🌿✨
 
-**URL**: https://lovable.dev/projects/60161626-9886-4238-b157-5b29eba9051c
+---
 
-## How can I edit this code?
+## 🚀 Live Demo
+🔗 [Check it out on Vercel](https://your-deployed-link.vercel.app)
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 🛠️ Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/60161626-9886-4238-b157-5b29eba9051c) and start prompting.
+AkiliSpa is powered by the best in modern frontend & backend technologies:
 
-Changes made via Lovable will be committed automatically to this repo.
+- ⚛️ React
+- ⚡ Vite
+- 🧪 Supabase (Database + Auth)
+- 🎨 ShadCN/UI & TailwindCSS
+- 💬 Lucide Icons
+- 🎥 Framer Motion (smooth animations)
+- 🌙 Theme Toggle (Dark/Light)
+- 🤖 AI Chatbot Integration
+- ☁️ Hosted on Vercel
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🎯 Features
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Here's everything AkiliSpa offers (and more coming soon):
 
-Follow these steps:
+### 🌐 Pages & Sections
+- **🏠 Landing Page** – Eye-catching, warm welcome to the app
+- **📚 Resources Page** – Curated articles and content for mental wellness
+- **🧑‍🤝‍🧑 Community Forum** – Connect, share, and support one another
+- **🩺 Therapy Booking** – Schedule sessions with certified mental health professionals
+- **🎵 Media Page** – Uplifting songs, calming videos, and more
+- **🤖 AI Chatbot** – Real-time emotional support & check-ins
+- **📊 Mental Health Dashboard** – AI-enabled mood & wellness tracker
+- **🧑 Profile Page** – Manage your personal info and preferences
+- **🌓 Theme Toggle** – Dark and Light modes for your vibe
+- **🦾 Authentication** – Secure login & registration
+- **📱 Fully Responsive Design** – Beautiful on every screen size
 
-```sh
+### 🧠 Smart & Supportive Additions
+- 💌 Real-time messaging and interaction
+- 🔔 Session reminders (Coming Soon!)
+- 🌐 Multilingual support (Coming Soon!)
+- 🎮 Gamified wellness challenges (Coming Soon!)
+- 📱 Future mobile app version
+
+---
+
+## 💻 Local Development
+
+Wanna contribute or explore the code? Follow these steps:
+
+### ✅ Requirements
+- Node.js & npm (install via `nvm`)
+- Git
+
+### 🧪 Setup Instructions
+
+```bash
 # Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
 
@@ -34,40 +73,4 @@ npm i
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/60161626-9886-4238-b157-5b29eba9051c) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
