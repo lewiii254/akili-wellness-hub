@@ -98,3 +98,20 @@ We’re just getting started! Here’s a sneak peek of what’s cooking:
 
 ## 🤝 Contributing
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated 💖
+
+```
+# Fork the repo
+# Create your branch: git checkout -b feature/AmazingFeature
+# Commit your changes: git commit -m 'Add some AmazingFeature'
+# Push to the branch: git push origin feature/AmazingFeature
+# Open a pull request
+```
+---
+## 🧑‍💻 Maintainers
+Built & maintained with care by the AkiliSpa Team 👨‍💻👩‍💻
+
+### 📄 License
+Distributed under the MIT License. See LICENSE for more information.
+
+### 💬 Stay Connected
+Follow us on socials for updates, stories, and more good vibes coming soon 🚀
