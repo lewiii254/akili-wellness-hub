@@ -96,17 +96,45 @@ We’re just getting started! Here’s a sneak peek of what’s cooking:
 
 - 🔒 End-to-End Chat Encryption
 
-## 🤝 Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated 💖
+# 🤝 Contributing to AkiliSpa
 
+We welcome contributions from the community! Here's how you can help make AkiliSpa even better:
+
+## 🧪 How to Contribute
+
+1. **Fork the repository** and clone it locally.
+2. **Create a new branch** for your feature or fix:
+   ```bash
+   git checkout -b feature/YourFeatureName
+3. Make your changes, test them thoroughly.
+
+4. Commit and push your code:
 ```
-# Fork the repo
-# Create your branch: git checkout -b feature/AmazingFeature
-# Commit your changes: git commit -m 'Add some AmazingFeature'
-# Push to the branch: git push origin feature/AmazingFeature
-# Open a pull request
+git commit -m "Add: Describe your change"
+git push origin feature/YourFeatureName
 ```
+5. Open a pull request, describe your changes, and submit it for review!
+### 💡 Contribution Ideas
+- New features & improvements
+
+- Bug fixes
+
+- UI/UX enhancements
+
+- Articles for the Resources page
+
+- Songs or videos for the Media section
+
+- Language translations
+
+- Performance or accessibility improvements
+### 📋 Code of Conduct
+Be kind, inclusive, and respectful 🙌. We're building a safe space for mental health – our community should reflect that.
+
+Happy coding 💜
+
 ---
+
 ## 🧑‍💻 Maintainers
 Built & maintained with care by the AkiliSpa Team 👨‍💻👩‍💻
 
@@ -115,3 +143,6 @@ Distributed under the MIT License. See LICENSE for more information.
 
 ### 💬 Stay Connected
 Follow us on socials for updates, stories, and more good vibes coming soon 🚀
+
+
+
