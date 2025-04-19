@@ -73,4 +73,28 @@ npm i
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+```
 
+🔧 If you want to work locally using your own IDE, clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+---
+
+## 🌟 Future Scope
+We’re just getting started! Here’s a sneak peek of what’s cooking:
+
+- 📱 Native Mobile App (React Native)
+
+- 🌍 Multilingual Accessibility
+
+- 🗓 AI-Powered Session Reminders
+
+- 🎮 Wellness Tracking Gamification
+
+- 📈 Predictive Mood & Emotion Analytics
+
+- 🧘 Meditation & Guided Relaxation Content
+
+- 🔒 End-to-End Chat Encryption
+
+## 🤝 Contributing
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated 💖
