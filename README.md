@@ -18,8 +18,8 @@
 
 ---
 
-## 🚀 Live Demo
-🔗 [Check it out on Vercel](https://your-deployed-link.vercel.app)
+## [🚀 Live Demo](https://akili-wellness-hub.vercel.app/)
+🔗 [Check it out on Vercel](https://akili-wellness-hub.vercel.app/)
 
 ---
 
