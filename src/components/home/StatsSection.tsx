@@ -11,11 +11,11 @@ const StatsSection = () => {
             <p className="text-sm text-muted-foreground">Resources Accessed 📚</p>
           </div>
           <div className="p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-sm">
-            <p className="text-4xl font-bold mb-2 text-akili-blue">5k+</p>
+            <p className="text-4xl font-bold mb-2 text-akili-blue">500+</p>
             <p className="text-sm text-muted-foreground">Community Members 👥</p>
           </div>
           <div className="p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-sm">
-            <p className="text-4xl font-bold mb-2 text-akili-orange">500+</p>
+            <p className="text-4xl font-bold mb-2 text-akili-orange">5+</p>
             <p className="text-sm text-muted-foreground">Professional Therapists 🧠</p>
           </div>
           <div className="p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-sm">
