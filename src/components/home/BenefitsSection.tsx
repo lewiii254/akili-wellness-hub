@@ -65,7 +65,7 @@ const BenefitsSection = () => {
           <div className="p-6 bg-background rounded-xl border shadow-sm">
             <div className="flex items-center mb-4">
               <CheckCircle className="h-6 w-6 text-akili-green mr-3" />
-              <h3 className="text-xl font-medium">Affordable Options 💰</h3>
+              <h3 className="text-xl font-medium">Affordable Options💰</h3>
             </div>
             <p className="text-muted-foreground">
               Mental wellness shouldn't be a luxury. We offer services at various price points to ensure accessibility.
