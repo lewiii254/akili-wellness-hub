@@ -68,7 +68,7 @@ const BenefitsSection = () => {
               <h3 className="text-xl font-medium">Affordable Options 💰</h3>
             </div>
             <p className="text-muted-foreground">
-              Mental wellness shouldn't be a luxury. we offer services at various price points to ensure accessibility.
+              Mental wellness shouldn't be a luxury. We offer services at various price points to ensure accessibility.
             </p>
           </div>
         </div>
