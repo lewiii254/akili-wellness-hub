@@ -91,7 +91,8 @@ const MediaPlayer = ({
   }, [volume]);
 
   return (
-    <div
+      <>
+          <div
       className={cn(
         "rounded-xl border bg-background p-4 flex flex-col w-full max-w-md",
         className
@@ -167,6 +168,7 @@ const MediaPlayer = ({
         </div>
       </div>
     </div>
+      </>
   );
 };
 
