@@ -10,6 +10,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
+    <>
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-grow pt-16">
@@ -18,6 +19,7 @@ const Layout = ({ children }: LayoutProps) => {
       <Footer />
       <ChatBot />
     </div>
+    </>
   );
 };
 

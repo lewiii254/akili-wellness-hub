@@ -1,11 +1,20 @@
 
 import React, { useState } from "react";
+
+// Hooks
 import { useAuth } from "@/hooks/useAuth";
+
+// Supabase client
 import { supabase } from "@/integrations/supabase/client";
+
+// UI Components
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-import { Shield, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+
+// Icons
+import { Shield, Loader2 } from "lucide-react";
+
 
 const AdminMaker = () => {
   const { user } = useAuth();
