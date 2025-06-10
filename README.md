@@ -20,7 +20,7 @@
 
 ## [🚀 Live Demo](https://akili-wellness-hub.vercel.app/)
 🔗 [Check it out on Vercel](https://akili-wellness-hub.vercel.app/)
-## [Pitch Deck](https://www.canva.com/design/DAGbveRfqXA/cFYD2FleXOe7nF-u1QpJQA/edit?utm_content=DAGbveRfqXA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+## 💹[Pitch Deck🚀](https://www.canva.com/design/DAGbveRfqXA/cFYD2FleXOe7nF-u1QpJQA/edit?utm_content=DAGbveRfqXA&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 ---
 
 ## 🛠️ Tech Stack
